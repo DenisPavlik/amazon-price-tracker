@@ -1,9 +1,15 @@
-import { Button } from "@/components/ui/button";
+import { auth } from "@/auth";
+import LoginView from "./LoginView";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
+  if (!session) {
+    return <LoginView />
+  }
   return (
     <div>
-      <Button>Submit</Button>
+      you are logged in
     </div>
   );
 }

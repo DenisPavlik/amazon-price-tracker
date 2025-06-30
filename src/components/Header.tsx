@@ -22,7 +22,7 @@ export default function Header(props: HeaderProps) {
     <header className="flex justify-between items-center">
       <Link href={""} className="flex gap-1 items-center">
         <ChartNoAxesCombinedIcon className="mb-1" />
-        Amzon price tracker
+        AmzonPriceTracker
       </Link>
       <div className="flex items-center gap-4">
         <div>

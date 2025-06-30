@@ -1,0 +1,14 @@
+import DashboardProductCard from "./DashboardProductCard";
+
+export default function Dashboard() {
+  return (
+    <div className="col-span-9 p-4">
+      <h2 className="font-bold my-2">Dashboard</h2>
+      <div className="grid grid-cols-3 gap-4">
+        <DashboardProductCard title="Price" value="$29.99" />
+        <DashboardProductCard title="Reviews" value="4.8" />
+        <DashboardProductCard title="Rank" value="352" />
+      </div>
+    </div>
+  );
+}

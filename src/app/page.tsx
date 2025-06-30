@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import Dashboard from "@/components/Dashboard";
 import Header from "@/components/Header";
 import LoginView from "@/components/LoginView";
 import Sidebar from "@/components/Sidebar";
@@ -18,9 +19,7 @@ export default async function Home() {
         <div className="col-span-3">
           <Sidebar />
         </div>
-        <div className="col-span-9 bg-white">
-          content
-        </div>
+        <Dashboard />
       </section>
     </div>
   );

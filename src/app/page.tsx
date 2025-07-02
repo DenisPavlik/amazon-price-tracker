@@ -16,7 +16,7 @@ export default async function Home() {
         image={session.user?.image ?? undefined}
         username={session.user?.name ?? 'User'} />
       <section className="grid grid-cols-12 gap-4 mt-4">
-        <div className="col-span-3">
+        <div className="col-span-3 pb-4">
           <Sidebar />
         </div>
         <Dashboard />

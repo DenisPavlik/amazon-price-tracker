@@ -34,7 +34,7 @@ export default function LineChart({
     },
   } satisfies ChartConfig;
   return (
-    <div className="-my-2">
+    <div className="w-full -my-2">
       <ChartContainer config={chartConfig}>
         <AreaChart
           accessibilityLayer

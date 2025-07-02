@@ -16,6 +16,7 @@ datasource db {
 
 model Product {
   id        Int      @id @default(autoincrement())
+  amazonId  String
   title     String
   img       String
   createdAt DateTime @default(now())

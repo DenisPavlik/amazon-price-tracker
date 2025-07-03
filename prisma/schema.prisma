@@ -15,10 +15,13 @@ datasource db {
 }
 
 model Product {
-  id        Int      @id @default(autoincrement())
-  amazonId  String
-  title     String
-  img       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   Int      @id @default(autoincrement())
+  amazonId             String
+  title                String
+  img                  String
+  price                Int
+  reviewsCount         Int
+  reviewsAverageRating Int
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }

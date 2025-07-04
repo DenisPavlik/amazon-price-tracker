@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import LoginView from "@/components/LoginView";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default async function RootLayout({
         {children}
         </section>
     </div>
+    <Toaster position="top-center" richColors />
       </body>
     </html>
   );

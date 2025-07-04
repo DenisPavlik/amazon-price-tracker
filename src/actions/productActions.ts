@@ -1,33 +1,46 @@
-'use server'
-import puppeteer from "puppeteer";
+"use server";
+
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 
 export async function addProduct(productId: string) {
-  const url = `https://www.amazon.com/dp/${productId}`;
-  const browser = await puppeteer.launch({
-    headless: true,
+  const response = await fetch(
+    `https://api.rainforestapi.com/request?api_key=${process.env.RAINFOREST_API_KEY}&amazon_domain=amazon.com&asin=${productId}&type=product`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch from Rainforest API");
+  }
+
+  const session = await auth();
+  const user = session?.user;
+  if (!user || !user.email) {
+    return false
+  }
+
+  const json = await response.json();
+  const product = json.product;
+
+  const { title, main_image, rating, buybox_winner, ratings_total } = product;
+  const price = Math.round(buybox_winner?.price?.value ?? 0);
+
+  const productRow = await prisma.product.upsert({
+    where: { amazonId: productId },
+    update: {
+      title,
+      img: main_image.link,
+      price,
+      reviewsCount: ratings_total,
+      reviewsAverageRating: Math.round(rating * 10),
+    },
+    create: {
+      userEmail: user.email,
+      title,
+      img: main_image.link,
+      price,
+      reviewsCount: ratings_total,
+      reviewsAverageRating: Math.round(rating * 10),
+      amazonId: productId,
+    },
   });
-  const page = await browser.newPage();
-
-  await page.goto(url, { waitUntil: "networkidle2" });
-
-  const data = await page.evaluate(() => {
-    const title = document.querySelector("#productTiltle")?.textContent?.trim()
-
-    const priceString = document.querySelector(".a-price .a-offscreen")?.textContent?.replace("$", "") || "0";
-    const price = parseFloat(priceString);
-
-    const img = document.querySelector("#landingImage")?.getAttribute("src");
-
-    const reviewsCountString = document.querySelector("#acrCustomerReviewText")?.textContent?.split(" ")[0].replace(",", "") || "0";
-    const reviewsCount = parseInt(reviewsCountString);
-
-    const ratingString = document.querySelector(".a-icon-alt")?.textContent?.split(" ")[0] || "0";
-    const reviewsAverageRating = parseFloat(ratingString);
-
-    return { title, price, img, reviewsCount, reviewsAverageRating };
-  })
-
-  await browser.close();
-
-  return data;
+  return productRow.id;
 }

@@ -1,7 +1,21 @@
+import { auth } from "@/auth";
 import DashboardProductCard from "./DashboardProductCard";
 import DashboardTopCard from "./DashboardTopCard";
+import { prisma } from "@/lib/db";
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const session = await auth();
+  const user = session?.user;
+  if (!user || !user.email) {
+    return null;
+  }
+
+  const products = await prisma.product.findMany({
+    where: {
+      userEmail: user.email,
+    },
+  });
+
   return (
     <div className="col-span-9 p-4">
       <h2 className="font-bold my-2">Dashboard</h2>
@@ -11,12 +25,9 @@ export default function Dashboard() {
         <DashboardTopCard title="Rank" value="352" />
       </div>
       <div className="grid grid-cols-2 gap-4 mt-4">
-        <DashboardProductCard />
-        <DashboardProductCard />
-        <DashboardProductCard />
-        <DashboardProductCard />
-        <DashboardProductCard />
-        <DashboardProductCard />
+        {products.map((product) => (
+          <DashboardProductCard key={product.id} product={product} />
+        ))}
       </div>
     </div>
   );

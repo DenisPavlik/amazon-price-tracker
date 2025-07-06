@@ -15,6 +15,14 @@ export default async function Dashboard() {
       userEmail: user.email,
     },
   });
+  const productIds = products.map((product) => product.amazonId);
+  const history = await prisma.productDataHistory.findMany({
+    where: {
+      amazonId: {
+        in: productIds,
+      },
+    },
+  });
 
   return (
     <div className="col-span-9 p-4">
@@ -26,7 +34,13 @@ export default async function Dashboard() {
       </div>
       <div className="grid grid-cols-2 gap-4 mt-4">
         {products.map((product) => (
-          <DashboardProductCard key={product.id} product={product} />
+          <DashboardProductCard
+            key={product.id}
+            product={product}
+            history={history.filter(
+              (history) => history.amazonId === product.amazonId
+            )}
+          />
         ))}
       </div>
     </div>

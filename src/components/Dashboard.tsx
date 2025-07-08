@@ -24,6 +24,8 @@ export default async function Dashboard() {
     },
   });
 
+  const reviewsAvgs: { x: string; rating: number }[] = [];
+
   return (
     <div className="col-span-9 p-4">
       <h2 className="font-bold my-2">Dashboard</h2>

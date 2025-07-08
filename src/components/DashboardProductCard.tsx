@@ -4,11 +4,7 @@ import Image from "next/image";
 import { Card } from "./ui/card";
 import LineChart from "./LineChart";
 import { Product, ProductDataHistory } from "../../generated/prisma";
-import ReactTimeAgo from "react-time-ago";
-import TimeAgo from "javascript-time-ago";
-
-import en from "javascript-time-ago/locale/en";
-TimeAgo.addDefaultLocale(en);
+import TrackerTimeAgo from "./TrackerTimeAgo";
 
 export default function DashboardProductCard({
   product,
@@ -19,29 +15,36 @@ export default function DashboardProductCard({
 }) {
   return (
     <Card className="p-4 overflow-hidden">
-      <div className="flex gap-4">
+      <div className="flex gap-4 items-center">
         <Image
           src={product.img}
           alt="product_image"
           width={200}
           height={200}
-          className="size-40"
+          className="size-30"
         />
-        <div className="relative grow flex items-end">
-          <div className="absolute top-4 left-0 w-full">
-            <h3 className="font-bold overflow-hidden text-ellipsis whitespace-nowrap">
-              {product.title.length > 60
-                ? product.title.slice(0, 60) + "..."
-                : product.title}
-            </h3>
-            <h4>${(product.price / 100).toFixed(2)}</h4>
-            <h5 className="text-xs text-gray-600">
-              <ReactTimeAgo date={product.updatedAt} />
-            </h5>
-            <pre>{JSON.stringify(history, null, 2)}</pre>
-            <div className="grow -ml-4 -mr-7">
-              <LineChart />
+        <div className="grow">
+          <h3 className="font-bold overflow-hidden text-ellipsis whitespace-nowrap">
+            {product.title.length > 30
+              ? product.title.slice(0, 30) + "..."
+              : product.title}
+          </h3>
+          <div className="flex">
+            <div>
+              <h4>${(product.price / 100).toFixed(2)}</h4>
+              <h5 className="text-xs text-gray-600">
+                <TrackerTimeAgo date={product.createdAt} />
+              </h5>
             </div>
+
+            <div className="grow pt-4">
+                <LineChart
+                  data={history.map((hp) => ({
+                    x: hp.createdAt.toLocaleDateString(),
+                    price: hp.price / 100,
+                  }))}
+                />
+              </div>
           </div>
         </div>
       </div>

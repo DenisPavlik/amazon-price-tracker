@@ -8,16 +8,14 @@ export async function addProduct(productId: string) {
   const session = await auth();
   const user = session?.user;
   if (!user || !user.email) {
-    return false
+    return false;
   }
 
-  const productRow = await prisma.product.create(
-    {
-      data: {
-        ...await productScraper(productId),
-        userEmail: user.email
-      }
-    }
-  );
+  const productRow = await prisma.product.create({
+    data: {
+      ...(await productScraper(productId)),
+      userEmail: user.email,
+    },
+  });
   return productRow.id;
 }

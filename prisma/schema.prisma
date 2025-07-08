@@ -30,7 +30,7 @@ model Product {
 }
 
 model ProductDataHistory {
-  id Int @id @default(autoincrement())
+  id                   Int      @id @default(autoincrement())
   amazonId             String
   title                String
   img                  String
@@ -38,4 +38,12 @@ model ProductDataHistory {
   reviewsCount         Int
   reviewsAverageRating Int
   createdAt            DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userEmail String
+  amazonId  String
+  title     String
+  createdAt DateTime @default(now())
 }

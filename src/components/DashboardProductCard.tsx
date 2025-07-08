@@ -38,13 +38,15 @@ export default function DashboardProductCard({
             </div>
 
             <div className="grow pt-4">
-                <LineChart
-                  data={history.map((hp) => ({
-                    x: hp.createdAt.toLocaleDateString(),
+              <LineChart
+                data={history
+                  .map((hp) => ({
+                    x: hp.createdAt.toISOString().slice(0, 10),
                     price: hp.price / 100,
-                  }))}
-                />
-              </div>
+                  }))
+                  .sort((a, b) => a.x.localeCompare(b.x))}
+              />
+            </div>
           </div>
         </div>
       </div>

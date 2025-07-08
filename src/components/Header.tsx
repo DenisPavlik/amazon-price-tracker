@@ -20,7 +20,7 @@ type HeaderProps = {
 export default function Header(props: HeaderProps) {
   return (
     <header className="flex justify-between items-center">
-      <Link href={""} className="flex gap-1 items-center">
+      <Link href={"/"} className="flex gap-1 items-center">
         <ChartNoAxesCombinedIcon className="mb-1" />
         AmzonPriceTracker
       </Link>

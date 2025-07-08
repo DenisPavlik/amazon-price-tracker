@@ -47,10 +47,14 @@ export default function LineChart({
           {/* <CartesianGrid vertical={false} /> */}
           <XAxis
             dataKey="x"
-            tickLine={false}
+            tick={false}
             axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
+            tickFormatter={(value) =>
+              new Date(value).toLocaleDateString("uk-UA", {
+                day: "2-digit",
+                month: "short",
+              })
+            }
           />
           <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
           <defs>
@@ -73,7 +77,7 @@ export default function LineChart({
               <Area
                 key={index}
                 dataKey={k}
-                type="natural"
+                type="linear"
                 fill="url(#fillDesktop)"
                 fillOpacity={0.4}
                 stroke="var(--color-desktop)"

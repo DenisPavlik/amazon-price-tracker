@@ -29,14 +29,16 @@ export default function DashboardProductCard({
         />
         <div className="relative grow flex items-end">
           <div className="absolute top-4 left-0 w-full">
-            <h3 className="font-bold">{product.title.charAt(10)}</h3>
+            <h3 className="font-bold overflow-hidden text-ellipsis whitespace-nowrap">
+              {product.title.length > 60
+                ? product.title.slice(0, 60) + "..."
+                : product.title}
+            </h3>
             <h4>${(product.price / 100).toFixed(2)}</h4>
             <h5 className="text-xs text-gray-600">
               <ReactTimeAgo date={product.updatedAt} />
             </h5>
-            <pre>
-              {JSON.stringify(history, null, 2)}
-            </pre>
+            <pre>{JSON.stringify(history, null, 2)}</pre>
             <div className="grow -ml-4 -mr-7">
               <LineChart />
             </div>

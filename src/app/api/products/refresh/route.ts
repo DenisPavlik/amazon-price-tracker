@@ -9,6 +9,7 @@ export async function GET() {
       where: {
         amazonId: product.amazonId,
       },
+      orderBy: { createdAt: "desc" },
     });
     if (latestHistoryDbData && isToday(latestHistoryDbData.createdAt)) {
       continue;

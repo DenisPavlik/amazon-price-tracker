@@ -18,7 +18,8 @@ export default function LineChart({
     { x: "June", price: 112 },
   ],
   label = "Price",
-  color = "var(--chart-1)",
+  color = "var(--chart-5)",
+  trend = 'orange',
 }: {
   data?: {
     x: string;
@@ -26,6 +27,7 @@ export default function LineChart({
   }[];
   label?: string;
   color?: string;
+  trend?: string;
 }) {
   const chartConfig = {
     desktop: {
@@ -34,58 +36,56 @@ export default function LineChart({
     },
   } satisfies ChartConfig;
   return (
-    <div className="w-full h-20 -my-2">
-      <ChartContainer config={chartConfig}>
-        <AreaChart
-          accessibilityLayer
-          data={data}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          {/* <CartesianGrid vertical={false} /> */}
-          <XAxis
-            dataKey="x"
-            tick={false}
-            axisLine={false}
-            tickFormatter={(value) =>
-              new Date(value).toLocaleDateString("uk-UA", {
-                day: "2-digit",
-                month: "short",
-              })
-            }
-          />
-          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-          <defs>
-            <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
-              <stop
-                offset="5%"
-                stopColor="var(--color-desktop)"
-                stopOpacity={0.8}
-              />
-              <stop
-                offset="95%"
-                stopColor="var(--color-desktop)"
-                stopOpacity={0.1}
-              />
-            </linearGradient>
-          </defs>
-          {Object.keys(data[0])
-            .filter((k) => k !== "x")
-            .map((k, index) => (
-              <Area
-                key={index}
-                dataKey={k}
-                type="linear"
-                fill="url(#fillDesktop)"
-                fillOpacity={0.4}
-                stroke="var(--color-desktop)"
-                stackId="a"
-              />
-            ))}
-        </AreaChart>
-      </ChartContainer>
+    <div className="w-full h-24 -my-2">
+      {data.length > 0 ? (
+        <ChartContainer config={chartConfig}>
+          <AreaChart
+            accessibilityLayer
+            data={data}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
+            {/* <CartesianGrid vertical={false} /> */}
+            <XAxis
+              dataKey="x"
+              tick={false}
+              axisLine={false}
+              tickFormatter={(value) =>
+                new Date(value).toLocaleDateString("uk-UA", {
+                  day: "2-digit",
+                  month: "short",
+                })
+              }
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <defs>
+              <linearGradient id={`fill-${trend}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={color} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={color} stopOpacity={0.1} />
+              </linearGradient>
+            </defs>
+            {Object.keys(data[0])
+              .filter((k) => k !== "x")
+              .map((k, index) => (
+                <Area
+                  key={index}
+                  dataKey={k}
+                  type="linear"
+                  fill={`url(#fill-${trend})`}
+                  fillOpacity={0.4}
+                  stroke={color}
+                  stackId="a"
+                />
+              ))}
+          </AreaChart>
+        </ChartContainer>
+      ) : (
+        <div className="text-sm text-gray-400 text-center">
+          No price history yet
+        </div>
+      )}
     </div>
   );
 }

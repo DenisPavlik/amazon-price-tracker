@@ -14,18 +14,13 @@ export default function DashboardTopCard({
   }[];
 }) {
   return (
-    <Card className="pt-4 pb-0">
-      <div className="flex justify-between relative">
-        <div className="flex flex-col absolute top-1 left-4">
-          <span>{title}</span>
-          <span className="font-bold">{value}</span>
-        </div>
-        <div className="grow h-24 overflow-hidden">
-          {data && (
-            <LineChart data={data} />
-          )}
-        </div>
-      </div>
-    </Card>
+    <Card className="pt-4 pb-0 overflow-hidden">
+  <div className="flex justify-between items-start">
+    <div className="flex flex-col px-4 pb-4">
+      <span className="text-nowrap">{title}</span>
+      <span className="font-bold">{value}</span>
+    </div>
+  </div>
+</Card>
   );
 }

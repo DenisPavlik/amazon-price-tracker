@@ -19,3 +19,38 @@ export async function addProduct(productId: string) {
   });
   return productRow.id;
 }
+
+export async function deleteProduct(id: number) {
+  const session = await auth();
+  const user = session?.user;
+  if (!user || !user.email) {
+    return false;
+  }
+
+  const productDoc = await prisma.product.findFirst({
+    where: {
+      id: id,
+      userEmail: user.email,
+    },
+  });
+
+  if (!productDoc) {
+    return false;
+  }
+
+  const productAmazonId = productDoc?.amazonId;
+
+  await prisma.product.delete({
+    where: {
+      id: id,
+    },
+  });
+
+  await prisma.productDataHistory.deleteMany({
+    where: {
+      amazonId: productAmazonId,
+    },
+  });
+
+  return true;
+}

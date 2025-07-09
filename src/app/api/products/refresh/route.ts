@@ -19,6 +19,14 @@ export async function GET() {
       data: newProductData,
     });
 
+    await prisma.product.update({
+      where: { id: product.id },
+      data: {
+        price: newProductData.price,
+        updatedAt: new Date(),
+      },
+    });
+
     const prevDayData = await prisma.productDataHistory.findFirst({
       where: {
         amazonId: product.amazonId,

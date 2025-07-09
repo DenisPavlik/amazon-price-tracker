@@ -17,12 +17,12 @@ export default async function Notifications() {
     },
   });
   return (
-    <div className="col-span-9 p-4">
+    <div className="col-span-12 md:col-span-9 p-4">
       <h2 className="font-bold my-2">Notifications</h2>
       <div className="flex flex-col gap-2">
         {notifications.map((notification) => (
-          <div className="flex gap-2" key={notification.id}>
-            <div className="text-gray-600">
+          <div className="flex gap-4" key={notification.id}>
+            <div className="text-gray-600 text-nowrap">
               {notification.createdAt.toISOString().slice(0, 10)}
             </div>
             <div>{notification.title}</div>

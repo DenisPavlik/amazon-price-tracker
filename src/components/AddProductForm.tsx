@@ -11,10 +11,28 @@ import { useState } from "react";
 export default function AddProductForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const productId = formData.get("productId") as string;
+    const rawInput = formData.get("productId") as string;
+    let productId = rawInput.trim();
+
+    try {
+      const url = new URL(productId);
+      const asinMatch =
+        url.pathname.match(/\/dp\/([A-Z0-9]{10})/) ||
+        url.pathname.match(/\/gp\/product\/([A-Z0-9]{10})/);
+
+      if (asinMatch && asinMatch[1]) {
+        productId = asinMatch[1];
+      } else {
+        toast.error("Could not extract ASIN from URL");
+        return;
+      }
+    } catch {
+      
+    }
 
     setLoading(true);
 
@@ -40,12 +58,12 @@ export default function AddProductForm() {
         htmlFor="productId"
         className="mb-1 uppercase font-extrabold text-gray-600"
       >
-        Product ID
+        ASIN or URL
       </Label>
       <Input
         id="productId"
         name="productId"
-        placeholder="Enter productID, example: L02IF44P817C"
+        placeholder="Enter ASIN or full Amazon URL"
       />
       <div className="flex justify-center mt-6">
         <Button type="submit" className="cursor-pointer" disabled={loading}>

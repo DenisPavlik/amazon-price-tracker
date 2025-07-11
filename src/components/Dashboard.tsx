@@ -3,6 +3,7 @@ import DashboardProductCard from "./DashboardProductCard";
 import DashboardTopCard from "./DashboardTopCard";
 import { prisma } from "@/lib/db";
 import { groupBy, sum } from "lodash";
+import Link from "next/link";
 
 export default async function Dashboard() {
   const session = await auth();
@@ -16,6 +17,26 @@ export default async function Dashboard() {
       userEmail: user.email,
     },
   });
+
+  if (products.length < 1) {
+    return (
+      <div className="col-span-12 md:col-span-9 p-4 text-center">
+        <h1 className="font-semibold text-xl text-gray-700">
+          You don&apos;t have any products yet!
+        </h1>
+        <p className="text-gray-500">
+          Press{" "}
+          <Link
+            href="/add-product"
+            className="underline text-orange-600 hover:text-orange-700 transition"
+          >
+            here
+          </Link>{" "}
+          to add your first product.
+        </p>
+      </div>
+    );
+  }
 
   const productIds = products.map((product) => product.amazonId);
   const history = await prisma.productDataHistory.findMany({
@@ -44,9 +65,9 @@ export default async function Dashboard() {
       rating: sum(dateRatings) / dateRatings.length,
     });
   }
-  const sortedReviewsAvgs = [...reviewsAvgs].sort((a, b) =>
-    a.x.localeCompare(b.x)
-  );
+
+  const latestAvg =
+    reviewsAvgs.length > 0 ? reviewsAvgs[reviewsAvgs.length - 1].rating : 0;
 
   let totalSavings = 0;
 
@@ -67,17 +88,15 @@ export default async function Dashboard() {
 
   return (
     <div className="col-span-12 md:col-span-9 p-4">
-      <h2 className="font-bold my-2">Dashboard</h2>
+      <h2 className="font-bold uppercase text-lg text-gray-600 mb-2">
+        Dashboard
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <DashboardTopCard
           title="Total Savings 💸"
           value={`$${(totalSavings / 100).toFixed(2)}`}
         />
-        <DashboardTopCard
-          title="Reviews ⭐️"
-          value="4.8"
-          data={sortedReviewsAvgs}
-        />
+        <DashboardTopCard title="Reviews ⭐️" value={latestAvg.toFixed(1)} />
         <DashboardTopCard title="Tracked Items" value={`${products.length}`} />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">

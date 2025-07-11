@@ -5,8 +5,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-// import { TrendingUp } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, XAxis } from "recharts";
 
 export default function LineChart({
   data = [
@@ -47,7 +46,6 @@ export default function LineChart({
               right: 12,
             }}
           >
-            {/* <CartesianGrid vertical={false} /> */}
             <XAxis
               dataKey="x"
               tick={false}

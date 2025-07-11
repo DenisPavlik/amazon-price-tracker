@@ -4,7 +4,8 @@ import Image from "next/image";
 import { Card } from "./ui/card";
 import LineChart from "./LineChart";
 import { Product, ProductDataHistory } from "../../generated/prisma";
-import TrackerTimeAgo from "./TrackerTimeAgo";
+// import TrackerTimeAgo from "./TrackerTimeAgo";
+import dynamic from "next/dynamic";
 import { Trash2, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { deleteProduct } from "@/actions/productActions";
@@ -20,6 +21,10 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import Link from "next/link";
+
+const TrackerTimeAgo = dynamic(() => import("./TrackerTimeAgo"), {
+  ssr: false,
+});
 
 export default function DashboardProductCard({
   product,

@@ -11,13 +11,26 @@ export async function addProduct(productId: string) {
     return false;
   }
 
-  const productRow = await prisma.product.create({
+  const productData = await productScraper(productId)
+
+  await prisma.product.create({
     data: {
-      ...(await productScraper(productId)),
+      ...productData,
       userEmail: user.email,
     },
   });
-  return productRow.id;
+
+  await prisma.productDataHistory.create({
+    data: {
+      amazonId: productId,
+      title: productData.title,
+      img: productData.img,
+      price: productData.price,
+      reviewsCount: productData.reviewsCount,
+      reviewsAverageRating: productData.reviewsAverageRating
+    }
+  })
+  return true;
 }
 
 export async function deleteProduct(id: number) {

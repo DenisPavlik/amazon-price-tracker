@@ -148,7 +148,7 @@ export default function DashboardProductCard({
             <div>
               <h4>${(product.price / 100).toFixed(2)}</h4>
               <h5 className="text-xs text-gray-600">
-                <TrackerTimeAgo date={product.createdAt} />
+                <TrackerTimeAgo date={product.updatedAt} />
               </h5>
             </div>
 

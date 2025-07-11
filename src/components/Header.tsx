@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import {
   AlignJustifyIcon,
@@ -17,23 +16,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
-import { Input } from "./ui/input";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 type HeaderProps = {
   image: string | undefined;
   username: string;
 };
 export default function Header(props: HeaderProps) {
-  const [search, setSearch] = useState("");
-  const router = useRouter();
-
-  const handleSearch: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    setSearch(e.target.value);
-    router.push(`/?search=${e.target.value}`);
-  };
-
   return (
     <header className="flex justify-between gap-2 items-center">
       <Link href={"/"} className="flex gap-1 items-center">
@@ -41,14 +29,6 @@ export default function Header(props: HeaderProps) {
         AmzonPriceTracker
       </Link>
       <div className="flex items-center gap-4">
-        <div>
-          <Input
-            placeholder="Search..."
-            value={search}
-            onChange={handleSearch}
-            className="bg-gray-100 border-none"
-          />
-        </div>
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Avatar>

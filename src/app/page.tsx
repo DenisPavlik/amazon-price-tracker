@@ -1,9 +1,5 @@
 import Dashboard from "@/components/Dashboard";
 
-export default function Home({
-  searchParams,
-}: {
-  searchParams: { search?: string }
-}) {
-  return <Dashboard search={searchParams?.search || ""} />;
+export default async function Home() {
+  return <Dashboard />;
 }

@@ -3,11 +3,8 @@ import DashboardProductCard from "./DashboardProductCard";
 import DashboardTopCard from "./DashboardTopCard";
 import { prisma } from "@/lib/db";
 import { groupBy, sum } from "lodash";
-import { useSearchParams } from "next/navigation";
 
 export default async function Dashboard() {
-  const searchParams = useSearchParams();
-  const search = searchParams.get("search") || "";
   const session = await auth();
   const user = session?.user;
   if (!user || !user.email) {
@@ -19,10 +16,6 @@ export default async function Dashboard() {
       userEmail: user.email,
     },
   });
-
-  const filteredProducts = products.filter(p =>
-    p.title.toLowerCase().includes(search.toLowerCase())
-  );
 
   const productIds = products.map((product) => product.amazonId);
   const history = await prisma.productDataHistory.findMany({
@@ -85,13 +78,10 @@ export default async function Dashboard() {
           value="4.8"
           data={sortedReviewsAvgs}
         />
-        <DashboardTopCard
-          title="Tracked Items"
-          value={`${products.length}`}
-        />
+        <DashboardTopCard title="Tracked Items" value={`${products.length}`} />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        {filteredProducts.map((product) => (
+        {products.map((product) => (
           <DashboardProductCard
             key={product.id}
             product={product}

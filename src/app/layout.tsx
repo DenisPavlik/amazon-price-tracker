@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Amazon Price Tracker",
   description: "Track a price for your favorite items here",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({

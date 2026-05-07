@@ -29,7 +29,7 @@ export default function Header(props: HeaderProps) {
       <Link href={"/"} className="flex gap-1 items-center">
         <ChartNoAxesCombinedIcon className="mb-1 size-8 text-orange-400" />
         <h2 className="text-3xl font-semibold bg-gradient-to-r from-[#FF9900] to-[#FF6600] bg-clip-text text-transparent">
-          Amazon Price Tracker
+          AmzPulse
         </h2>
       </Link>
       <div className="flex items-center gap-4">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 import LoginView from "@/components/LoginView";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
@@ -38,6 +39,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const unreadCount = session?.user?.email
+    ? await prisma.notification.count({
+        where: { userEmail: session.user.email },
+      })
+    : 0;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -51,10 +57,11 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {session ? (
-            <div className="w-full max-w-[1440px] mx-auto p-4 h-screen">
+            <div className="w-full max-w-[1440px] mx-auto p-4 min-h-screen">
               <Header
                 image={session.user?.image ?? undefined}
                 username={session.user?.name ?? "User"}
+                unreadCount={unreadCount}
               />
               <section className="grid grid-cols-12 gap-4 mt-4">
                 <div className="hidden md:block col-span-3 pb-4">

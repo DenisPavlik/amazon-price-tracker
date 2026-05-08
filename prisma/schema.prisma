@@ -28,6 +28,8 @@ model Product {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
+  notifications Notification[]
+
   @@unique([amazonId, userEmail])
 }
 
@@ -44,11 +46,25 @@ model ProductDataHistory {
   @@index([amazonId, createdAt(sort: Desc)])
 }
 
+enum NotificationKind {
+  PRICE_DROP
+  TARGET_HIT
+}
+
 model Notification {
-  id        Int      @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   userEmail String
   amazonId  String
   title     String
-  type      String   @default("PRICE_DROP")
-  createdAt DateTime @default(now())
+  kind      NotificationKind @default(PRICE_DROP)
+  priceFrom Int?
+  priceTo   Int?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([userEmail, isRead])
+  @@index([userEmail, createdAt(sort: Desc)])
 }

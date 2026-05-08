@@ -7,7 +7,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "bunx dotenv -e .env.local -- bunx prisma db push"
+    "db:push": "bunx dotenv -e .env.local -- bunx prisma db push",
+    "db:backfill-lowest": "bunx dotenv -e .env.local -- bun run scripts/backfill-lowest-price.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.11.1",

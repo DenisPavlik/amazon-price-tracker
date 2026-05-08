@@ -21,7 +21,10 @@ export const metadata: Metadata = {
   title: "Amazon Price Tracker",
   description: "Track a price for your favorite items here",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
   },
 };
 

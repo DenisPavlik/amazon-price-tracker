@@ -51,10 +51,11 @@ export async function GET() {
         data: {
           userEmail: product.userEmail,
           amazonId: product.amazonId,
-          type: "PRICE_DROP",
-          title: `The price of ${shortTitle} dropped from $${(
-            prevDayData.price / 100
-          ).toFixed(2)} to $${(newProductData.price / 100).toFixed(2)}`,
+          productId: product.id,
+          kind: "PRICE_DROP",
+          priceFrom: prevDayData.price,
+          priceTo: newProductData.price,
+          title: shortTitle,
         },
       });
     }
@@ -69,10 +70,11 @@ export async function GET() {
         data: {
           userEmail: product.userEmail,
           amazonId: product.amazonId,
-          type: "TARGET_HIT",
-          title: `Target hit: ${shortTitle} is now $${(
-            newProductData.price / 100
-          ).toFixed(2)} (target $${(product.targetPrice! / 100).toFixed(2)})`,
+          productId: product.id,
+          kind: "TARGET_HIT",
+          priceFrom: product.targetPrice!,
+          priceTo: newProductData.price,
+          title: shortTitle,
         },
       });
     }

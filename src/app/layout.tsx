@@ -44,7 +44,7 @@ export default async function RootLayout({
   const session = await auth();
   const unreadCount = session?.user?.email
     ? await prisma.notification.count({
-        where: { userEmail: session.user.email },
+        where: { userEmail: session.user.email, isRead: false },
       })
     : 0;
 

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 import LoginView from "@/components/LoginView";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,9 +19,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+  axes: ["opsz", "wdth"],
+});
+
 export const metadata: Metadata = {
-  title: "Amazon Price Tracker",
-  description: "Track a price for your favorite items here",
+  title: "AmzPulse — Amazon Price Tracker",
+  description: "AmzPulse tracks Amazon prices and notifies you the moment they drop.",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
@@ -34,29 +42,42 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const unreadCount = session?.user?.email
+    ? await prisma.notification.count({
+        where: { userEmail: session.user.email },
+      })
+    : 0;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} antialiased`}
       >
-        {session ? (
-          <div className="w-full max-w-[1440px] mx-auto p-4 h-screen">
-            <Header
-              image={session.user?.image ?? undefined}
-              username={session.user?.name ?? "User"}
-            />
-            <section className="grid grid-cols-12 gap-4 mt-4">
-              <div className="hidden md:block col-span-3 pb-4">
-                <Sidebar />
-              </div>
-              {children}
-            </section>
-          </div>
-        ) : (
-          <LoginView />
-        )}
-        <Toaster position="top-center" richColors />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {session ? (
+            <div className="w-full max-w-[1440px] mx-auto p-4 min-h-screen">
+              <Header
+                image={session.user?.image ?? undefined}
+                username={session.user?.name ?? "User"}
+                unreadCount={unreadCount}
+              />
+              <section className="grid grid-cols-12 gap-4 mt-4">
+                <div className="hidden md:block col-span-3 pb-4">
+                  <Sidebar />
+                </div>
+                {children}
+              </section>
+            </div>
+          ) : (
+            <LoginView />
+          )}
+          <Toaster position="top-center" richColors />
+        </ThemeProvider>
       </body>
     </html>
   );

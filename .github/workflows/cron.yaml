@@ -1,0 +1,12 @@
+name: fetch-prices
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call product refresh API
+        run: curl 'https://denys-amazon-price-tracker.vercel.app/api/products/refresh'

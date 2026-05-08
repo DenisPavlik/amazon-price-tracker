@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication
+
+Always respond in Ukrainian.
+
 ## Commands
 
 Package manager is **bun** (see `bun.lockb`).

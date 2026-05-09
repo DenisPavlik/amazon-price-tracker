@@ -61,3 +61,23 @@ Note: `puppeteer` is a dependency but the active scraper uses Rainforest; Puppet
 - `src/app/page.tsx` is the dashboard entry; major views live in `src/components/` (`Dashboard`, `Sidebar`, `LoginView`, `AddProductForm`, `LineChart`, etc.).
 - `src/components/ui/` is shadcn/ui-generated; `components.json` configures shadcn. Re-running shadcn add will overwrite these.
 - Image domain `m.media-amazon.com` is whitelisted in `next.config.ts` for `next/image`.
+
+## Coding Principles
+
+Adapted from [Karpathy coding principles](https://github.com/forrestchang/andrej-karpathy-skills). User-facing responses remain in Ukrainian (see "Communication").
+
+### 1. Think Before Coding
+
+Surface assumptions and uncertainties before editing. If a request has two valid readings (e.g. "add a notification" — `PRICE_DROP` or `TARGET_HIT`?), stop and ask rather than silently picking one. The same applies to the Prisma schema, the price-in-cents convention, and the `userEmail` tenant scope — clarify first if it isn't obvious from the code.
+
+### 2. Simplicity First
+
+Write the minimum code that solves the stated problem. No speculative abstractions, "future-proof" helpers, or feature flags. Check: would a senior engineer call this overcomplicated? In this project that means: don't add layers on top of server actions / `@/lib/db`, don't duplicate scraper logic, and don't build new UI components if `src/components/ui/` already has the right shadcn primitive.
+
+### 3. Surgical Changes
+
+Edit only what the request requires. Match the existing style (Tailwind v4, shadcn, server actions with `await auth()`); don't refactor neighboring files "while you're there." Every changed line must trace directly to the task. If you spot an unrelated issue, file it separately — don't mix it into the current PR.
+
+### 4. Goal-Driven Execution
+
+Restate the task as measurable success criteria before starting. For features from `PLAN.md`, sync with the phase checklist; for bugs, describe how to reproduce and verify. After changes: `bun run lint` and `bun run build` (which includes `prisma generate`) as the minimum gate, plus manual checks via `bun dev`, since there is no test runner.

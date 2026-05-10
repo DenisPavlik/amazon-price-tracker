@@ -2,18 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  AlignJustifyIcon,
-  BellIcon,
-  PackagePlusIcon,
-} from "lucide-react";
+import { BellIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
@@ -26,11 +20,6 @@ type HeaderProps = {
   username: string;
   unreadCount?: number;
 };
-
-const NAV = [
-  { href: "/", label: "Products", icon: AlignJustifyIcon },
-  { href: "/add-product", label: "Add product", icon: PackagePlusIcon },
-];
 
 export default function Header({ image, username, unreadCount = 0 }: HeaderProps) {
   const pathname = usePathname();
@@ -106,32 +95,6 @@ export default function Header({ image, username, unreadCount = 0 }: HeaderProps
         </div>
       </Link>
 
-      <nav className="hidden md:flex items-center gap-1">
-        {NAV.map(({ href, label }) => {
-          const active = isActive(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "relative px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                active
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {label}
-              <span
-                className={cn(
-                  "absolute left-3 right-3 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-[#FF9900] to-[#FF6600] transition-opacity",
-                  active ? "opacity-100" : "opacity-0"
-                )}
-              />
-            </Link>
-          );
-        })}
-      </nav>
-
       <div className="flex items-center gap-1.5">
         <Link
           href="/notifications"
@@ -159,24 +122,6 @@ export default function Header({ image, username, unreadCount = 0 }: HeaderProps
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuGroup className="flex flex-col gap-1 md:hidden">
-              <DropdownMenuItem asChild>
-                <Link href="/" className="flex items-center gap-2">
-                  <AlignJustifyIcon size={18} /> All products
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/add-product" className="flex items-center gap-2">
-                  <PackagePlusIcon size={18} /> Add product
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/notifications" className="flex items-center gap-2">
-                  <BellIcon size={18} /> Notifications
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator className="md:hidden" />
             <DropdownMenuGroup>
               <Button className="w-full" onClick={() => signOut()}>
                 Log out

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ActivityIcon,
   AlignJustifyIcon,
   BellIcon,
   PackagePlusIcon,
@@ -9,12 +10,14 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import FilterControls from "./FilterControls";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
 const NAV: NavItem[] = [
   { href: "/", label: "All products", icon: AlignJustifyIcon },
   { href: "/add-product", label: "Add product", icon: PackagePlusIcon },
+  { href: "/activity", label: "Activity", icon: ActivityIcon },
   { href: "/notifications", label: "Notifications", icon: BellIcon },
 ];
 
@@ -61,6 +64,16 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {pathname === "/" && (
+        <>
+          <div className="h-px bg-border/60" />
+          <h2 className="uppercase text-xs font-semibold tracking-wider text-muted-foreground">
+            Filters
+          </h2>
+          <FilterControls />
+        </>
+      )}
     </aside>
   );
 }

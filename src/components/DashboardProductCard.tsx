@@ -5,7 +5,15 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Star, Trash2, TrendingDown, TrendingUp, Minus, X } from "lucide-react";
+import {
+  PackageXIcon,
+  Star,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Card } from "./ui/card";
@@ -86,6 +94,7 @@ export default function DashboardProductCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
+  const isUnavailable = product.price === 0;
   const initialPrice = history.length ? history[0].price : product.price;
   const latestPrice = history.length
     ? history[history.length - 1].price
@@ -130,7 +139,8 @@ export default function DashboardProductCard({
       className={cn(
         "relative overflow-hidden p-0 group transition-all duration-300",
         "hover:shadow-[0_0_0_1px_var(--primary),0_10px_40px_-12px_rgb(255_153_0_/_0.35)]",
-        "hover:-translate-y-0.5"
+        "hover:-translate-y-0.5",
+        isUnavailable && "opacity-60 saturate-50"
       )}
     >
       <Link
@@ -153,7 +163,14 @@ export default function DashboardProductCard({
               <h3 className="font-semibold leading-snug line-clamp-2 flex-1">
                 {product.title}
               </h3>
-              <DeltaBadge pct={deltaPct} trend={trend} />
+              {isUnavailable ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted text-muted-foreground px-2 py-0.5 text-xs font-semibold">
+                  <PackageXIcon size={12} />
+                  Unavailable
+                </span>
+              ) : (
+                <DeltaBadge pct={deltaPct} trend={trend} />
+              )}
             </div>
 
             <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
@@ -165,18 +182,27 @@ export default function DashboardProductCard({
             </div>
 
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="font-display text-2xl font-semibold tracking-tight">
-                ${(product.price / 100).toFixed(2)}
-              </span>
-              {product.lowestPrice != null && product.lowestPrice < product.price && (
-                <span className="text-xs text-muted-foreground">
-                  low ${(product.lowestPrice / 100).toFixed(2)}
+              {isUnavailable ? (
+                <span className="font-display text-2xl font-semibold tracking-tight text-muted-foreground">
+                  N/A
                 </span>
-              )}
-              {product.targetPrice != null && (
-                <span className="text-xs text-primary/90">
-                  · target ${(product.targetPrice / 100).toFixed(2)}
-                </span>
+              ) : (
+                <>
+                  <span className="font-display text-2xl font-semibold tracking-tight">
+                    ${(product.price / 100).toFixed(2)}
+                  </span>
+                  {product.lowestPrice != null &&
+                    product.lowestPrice < product.price && (
+                      <span className="text-xs text-muted-foreground">
+                        low ${(product.lowestPrice / 100).toFixed(2)}
+                      </span>
+                    )}
+                  {product.targetPrice != null && (
+                    <span className="text-xs text-primary/90">
+                      · target ${(product.targetPrice / 100).toFixed(2)}
+                    </span>
+                  )}
+                </>
               )}
             </div>
             <div className="text-[11px] text-muted-foreground/80 mt-0.5">

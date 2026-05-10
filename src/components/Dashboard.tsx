@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
 import DashboardProductCard from "./DashboardProductCard";
-import DashboardTopCard from "./DashboardTopCard";
+import TopDropCard from "./TopDropCard";
 import { prisma } from "@/lib/db";
-import { groupBy, sum } from "lodash";
+import { getTopDropsThisWeek, getTotalSavingsAllTime } from "@/lib/queries";
 import Link from "next/link";
 
 export default async function Dashboard() {
@@ -50,66 +50,65 @@ export default async function Dashboard() {
     },
   });
 
-  const historyByDates = groupBy(history, (h) =>
-    h.createdAt.toISOString().slice(0, 10)
-  );
-
-  const reviewsAvgs: { x: string; rating: number }[] = [];
-
-  for (const date of Object.keys(historyByDates).sort()) {
-    const dateRatings = historyByDates[date].map(
-      (hp) => hp.reviewsAverageRating / 10
-    );
-    reviewsAvgs.push({
-      x: date,
-      rating: sum(dateRatings) / dateRatings.length,
-    });
-  }
-
-  const latestAvg =
-    reviewsAvgs.length > 0 ? reviewsAvgs[reviewsAvgs.length - 1].rating : 0;
-
-  let totalSavings = 0;
-
-  for (const product of products) {
-    const productHistory = history.filter(
-      (h) => h.amazonId === product.amazonId
-    );
-
-    if (productHistory.length >= 2) {
-      const initialPrice = productHistory[0].price;
-      const latestPrice = productHistory[productHistory.length - 1].price;
-
-      if (latestPrice < initialPrice) {
-        totalSavings += initialPrice - latestPrice;
-      }
-    }
-  }
+  const [totalSavings, topDrops] = await Promise.all([
+    getTotalSavingsAllTime(user.email),
+    getTopDropsThisWeek(user.email, 3),
+  ]);
 
   return (
-    <div className="col-span-12 md:col-span-9 p-4">
-      <h2 className="font-bold uppercase text-lg text-gray-600 mb-2">
-        Dashboard
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <DashboardTopCard
-          title="Total Savings 💸"
-          value={`$${(totalSavings / 100).toFixed(2)}`}
-        />
-        <DashboardTopCard title="Reviews ⭐️" value={latestAvg.toFixed(1)} />
-        <DashboardTopCard title="Tracked Items" value={`${products.length}`} />
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        {products.map((product) => (
-          <DashboardProductCard
-            key={product.id}
-            product={product}
-            history={history.filter(
-              (history) => history.amazonId === product.amazonId
-            )}
-          />
-        ))}
-      </div>
+    <div className="col-span-12 md:col-span-9 p-4 space-y-8">
+      <section>
+        <header className="flex items-end justify-between gap-4 mb-3">
+          <h2 className="font-display text-xl font-semibold tracking-tight">
+            Top Drops This Week
+          </h2>
+          <div className="text-sm text-muted-foreground">
+            Total Savings:{" "}
+            <span
+              className="font-display font-semibold"
+              style={{ color: "var(--chart-green)" }}
+            >
+              ${(totalSavings / 100).toFixed(2)}
+            </span>
+          </div>
+        </header>
+        {topDrops.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {topDrops.map((deal) => (
+              <TopDropCard key={deal.product.id} deal={deal} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-6 text-center text-sm text-muted-foreground">
+            No drops this week yet.
+          </div>
+        )}
+      </section>
+
+      <section>
+        <header className="flex items-end justify-between gap-4 mb-3">
+          <h2 className="font-display text-xl font-semibold tracking-tight">
+            All Items
+          </h2>
+          <div className="text-sm text-muted-foreground">
+            <span className="font-display font-semibold text-foreground">
+              {products.length}
+            </span>{" "}
+            tracked
+          </div>
+        </header>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {products.map((product) => (
+            <DashboardProductCard
+              key={product.id}
+              product={product}
+              history={history.filter(
+                (h) => h.amazonId === product.amazonId
+              )}
+            />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

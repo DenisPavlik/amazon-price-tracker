@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import type { Product } from "../../generated/prisma";
+import type { Product } from "@/lib/types";
 
 export type TopDrop = {
   product: Product;

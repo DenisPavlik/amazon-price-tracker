@@ -23,6 +23,7 @@ There is no test runner configured.
 - `DATABASE_URL` — PostgreSQL connection string (Prisma datasource)
 - `RAPIDAPI_KEY` — RapidAPI key for the Real-Time Amazon Data API (used by `productScraper`)
 - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` and `AUTH_SECRET` — NextAuth v5 with Google provider
+- `CRON_SECRET` — shared secret required by `GET /api/products/refresh`; cron must send `Authorization: Bearer ${CRON_SECRET}`
 
 Local env lives in `.env.local`.
 
@@ -54,7 +55,6 @@ Prices are stored as integer cents; ratings are stored as integer × 10 (see `pr
 - `src/lib/productScraper.ts` calls the RapidAPI Real-Time Amazon Data endpoint (`real-time-amazon-data.p.rapidapi.com/product-details`) by ASIN; returns the shape used by both `Product` and `ProductDataHistory`. Throws `ScraperError` with `kind: "quota_exceeded" | "fetch_failed"` so server actions can branch on it.
 - `src/app/api/products/refresh/route.ts` is a `GET` endpoint that iterates every `Product`, skips any that already have a `ProductDataHistory` row created today (`isToday`), otherwise scrapes a new snapshot, updates the `Product` price, and creates a `Notification` if yesterday's price was higher than today's. This route is intended to be hit by an external scheduler (cron) — it is **not** auth-scoped and processes all users in one pass.
 
-Note: `puppeteer` is a dependency but the active scraper uses the RapidAPI Real-Time Amazon Data endpoint; Puppeteer code may be legacy/unused.
 
 ### UI structure
 

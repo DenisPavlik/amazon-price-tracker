@@ -7,7 +7,7 @@ import {
   getTotalSavingsAllTime,
 } from "@/lib/queries";
 import Link from "next/link";
-import type { Product, ProductDataHistory } from "../../generated/prisma";
+import type { Product, ProductDataHistory } from "@/lib/types";
 
 type SortKey =
   | "newest"

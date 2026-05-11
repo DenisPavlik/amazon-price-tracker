@@ -4,6 +4,7 @@ import { TrendingDown } from "lucide-react";
 
 import { Card } from "./ui/card";
 import { cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/price";
 import type { TopDrop } from "@/lib/queries";
 
 export default function TopDropCard({ deal }: { deal: TopDrop }) {
@@ -51,10 +52,10 @@ export default function TopDropCard({ deal }: { deal: TopDrop }) {
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="font-display text-xl font-semibold tracking-tight">
-                ${(newPrice / 100).toFixed(2)}
+                {formatPrice(newPrice)}
               </span>
               <span className="text-xs text-muted-foreground line-through">
-                ${(oldPrice / 100).toFixed(2)}
+                {formatPrice(oldPrice)}
               </span>
             </div>
           </div>

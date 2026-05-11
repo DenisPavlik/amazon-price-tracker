@@ -27,9 +27,10 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import LineChart from "./LineChart";
-import { Product, ProductDataHistory } from "../../generated/prisma";
+import type { Product, ProductDataHistory } from "@/lib/types";
 import { deleteProduct } from "@/actions/productActions";
 import { cn } from "@/lib/utils";
+import { formatPrice, hasPrice, PRICE_UNAVAILABLE } from "@/lib/price";
 
 const TrackerTimeAgo = dynamic(() => import("./TrackerTimeAgo"), {
   ssr: false,
@@ -183,23 +184,23 @@ export default function DashboardProductCard({
 
             <div className="mt-2 flex items-baseline gap-2">
               {isUnavailable ? (
-                <span className="font-display text-2xl font-semibold tracking-tight text-muted-foreground">
-                  N/A
+                <span className="font-display text-base font-medium tracking-tight text-muted-foreground">
+                  {PRICE_UNAVAILABLE}
                 </span>
               ) : (
                 <>
                   <span className="font-display text-2xl font-semibold tracking-tight">
-                    ${(product.price / 100).toFixed(2)}
+                    {formatPrice(product.price)}
                   </span>
-                  {product.lowestPrice != null &&
+                  {hasPrice(product.lowestPrice) &&
                     product.lowestPrice < product.price && (
                       <span className="text-xs text-muted-foreground">
-                        low ${(product.lowestPrice / 100).toFixed(2)}
+                        low {formatPrice(product.lowestPrice)}
                       </span>
                     )}
-                  {product.targetPrice != null && (
+                  {hasPrice(product.targetPrice) && (
                     <span className="text-xs text-primary/90">
-                      · target ${(product.targetPrice / 100).toFixed(2)}
+                      · target {formatPrice(product.targetPrice)}
                     </span>
                   )}
                 </>

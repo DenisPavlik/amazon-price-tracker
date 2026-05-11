@@ -27,7 +27,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import LineChart from "./LineChart";
-import { Product, ProductDataHistory } from "../../generated/prisma";
+import type { Product, ProductDataHistory } from "@/lib/types";
 import { deleteProduct } from "@/actions/productActions";
 import { cn } from "@/lib/utils";
 

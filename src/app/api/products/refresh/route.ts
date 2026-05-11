@@ -1,12 +1,22 @@
 import { prisma } from "@/lib/db";
 import { productScraper } from "@/lib/productScraper";
 import { endOfDay, isToday, startOfDay, subDays } from "date-fns";
+import type { NextRequest } from "next/server";
 
 function shorten(title: string, max = 60) {
   return title.length > max ? title.slice(0, max) + "..." : title;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const expected = process.env.CRON_SECRET;
+  if (!expected) {
+    return new Response("Server misconfigured", { status: 500 });
+  }
+  const auth = req.headers.get("authorization");
+  if (auth !== `Bearer ${expected}`) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const products = await prisma.product.findMany();
   for (const product of products) {
     const latestHistoryDbData = await prisma.productDataHistory.findFirst({

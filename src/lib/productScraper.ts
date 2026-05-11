@@ -1,8 +1,17 @@
 export class ScraperError extends Error {
-  constructor(public kind: "quota_exceeded" | "fetch_failed", message: string) {
+  constructor(
+    public kind: "quota_exceeded" | "fetch_failed",
+    message: string,
+    public status?: number,
+    public body?: string
+  ) {
     super(message);
     this.name = "ScraperError";
   }
+}
+
+function truncate(s: string, max = 300) {
+  return s.length > max ? s.slice(0, max) + "…" : s;
 }
 
 type ProductDetailsResponse = {
@@ -30,18 +39,42 @@ export async function productScraper(productId: string) {
   );
 
   if (!response.ok) {
+    const body = truncate(await response.text().catch(() => ""));
     if (response.status === 429) {
-      throw new ScraperError("quota_exceeded", "RapidAPI rate limit / quota");
+      throw new ScraperError(
+        "quota_exceeded",
+        `RapidAPI rate limit / quota (status ${response.status}): ${body}`,
+        response.status,
+        body
+      );
     }
     throw new ScraperError(
       "fetch_failed",
-      `RapidAPI responded ${response.status}`
+      `RapidAPI responded ${response.status} ${response.statusText}: ${body}`,
+      response.status,
+      body
     );
   }
 
-  const json = (await response.json()) as ProductDetailsResponse;
+  const rawText = await response.text();
+  let json: ProductDetailsResponse;
+  try {
+    json = JSON.parse(rawText) as ProductDetailsResponse;
+  } catch {
+    throw new ScraperError(
+      "fetch_failed",
+      `RapidAPI returned non-JSON payload: ${truncate(rawText)}`,
+      response.status,
+      truncate(rawText)
+    );
+  }
   if (json.status !== "OK" || !json.data) {
-    throw new ScraperError("fetch_failed", "RapidAPI returned non-OK payload");
+    throw new ScraperError(
+      "fetch_failed",
+      `RapidAPI returned non-OK payload (status=${json.status}): ${truncate(rawText)}`,
+      response.status,
+      truncate(rawText)
+    );
   }
 
   const product = json.data;
@@ -50,6 +83,7 @@ export async function productScraper(productId: string) {
     ? parseFloat(product.product_star_rating)
     : 0;
 
+  // price → cents (Int); rating → star × 10 (Int). See prisma/schema.prisma.
   return {
     title: product.product_title,
     img: product.product_photo ?? "",

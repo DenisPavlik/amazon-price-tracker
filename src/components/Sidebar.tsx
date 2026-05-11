@@ -1,30 +1,14 @@
 "use client";
 
-import {
-  ActivityIcon,
-  AlignJustifyIcon,
-  BellIcon,
-  PackagePlusIcon,
-  type LucideIcon,
-} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { NAV_ITEMS, isActivePath } from "@/lib/navigation";
 import FilterControls from "./FilterControls";
-
-type NavItem = { href: string; label: string; icon: LucideIcon };
-
-const NAV: NavItem[] = [
-  { href: "/", label: "All products", icon: AlignJustifyIcon },
-  { href: "/add-product", label: "Add product", icon: PackagePlusIcon },
-  { href: "/activity", label: "Activity", icon: ActivityIcon },
-  { href: "/notifications", label: "Notifications", icon: BellIcon },
-];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname?.startsWith(href);
+  const isActive = (href: string) => isActivePath(pathname, href);
 
   return (
     <aside className="flex flex-col gap-4 p-4 rounded-2xl bg-card/70 border border-border/60 backdrop-blur-sm h-fit sticky top-4">
@@ -32,7 +16,7 @@ export default function Sidebar() {
         Navigation
       </h2>
       <nav className="flex flex-col gap-1">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const active = isActive(href);
           return (
             <Link

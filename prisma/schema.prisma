@@ -14,6 +14,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Price fields (`price`, `targetPrice`, `lowestPrice`) are stored as integer **cents**.
+/// `reviewsAverageRating` is the star rating × 10 stored as Int (e.g. 4.2 → 42).
+/// UI must divide accordingly when rendering.
 model Product {
   id                   Int      @id @default(autoincrement())
   userEmail            String
@@ -33,6 +36,7 @@ model Product {
   @@unique([amazonId, userEmail])
 }
 
+/// `price` in cents; `reviewsAverageRating` is star rating × 10 (see Product).
 model ProductDataHistory {
   id                   Int      @id @default(autoincrement())
   amazonId             String

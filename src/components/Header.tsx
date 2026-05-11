@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/lib/utils";
+import { isActivePath } from "@/lib/navigation";
 
 type HeaderProps = {
   image: string | undefined;
@@ -23,8 +24,7 @@ type HeaderProps = {
 
 export default function Header({ image, username, unreadCount = 0 }: HeaderProps) {
   const pathname = usePathname();
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname?.startsWith(href);
+  const isActive = (href: string) => isActivePath(pathname, href);
 
   return (
     <header className="flex justify-between gap-2 items-center">

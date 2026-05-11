@@ -14,6 +14,17 @@ function truncate(s: string, max = 300) {
   return s.length > max ? s.slice(0, max) + "…" : s;
 }
 
+/**
+ * RapidAPI returns prices as US-formatted strings like "2,640.61" or "$2,640.61".
+ * `parseFloat` stops at the first comma → strip non-numeric characters first.
+ */
+function parseLocalizedNumber(raw: string | null | undefined): number {
+  if (!raw) return 0;
+  const cleaned = raw.replace(/[^0-9.]/g, "");
+  const n = parseFloat(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
+
 type ProductDetailsResponse = {
   status: string;
   data?: {
@@ -78,10 +89,8 @@ export async function productScraper(productId: string) {
   }
 
   const product = json.data;
-  const priceNum = product.product_price ? parseFloat(product.product_price) : 0;
-  const ratingNum = product.product_star_rating
-    ? parseFloat(product.product_star_rating)
-    : 0;
+  const priceNum = parseLocalizedNumber(product.product_price);
+  const ratingNum = parseLocalizedNumber(product.product_star_rating);
 
   // price → cents (Int); rating → star × 10 (Int). See prisma/schema.prisma.
   return {

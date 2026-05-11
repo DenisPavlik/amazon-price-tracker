@@ -10,10 +10,11 @@ import { Card } from "@/components/ui/card";
 import ProductDetailChart from "@/components/ProductDetailChart";
 import SetTargetPriceForm from "@/components/SetTargetPriceForm";
 import { cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/price";
 
 function fmtPrice(cents: number | null | undefined) {
   if (cents == null) return "—";
-  return `$${(cents / 100).toFixed(2)}`;
+  return formatPrice(cents);
 }
 
 export default async function ProductDetailPage({
@@ -173,7 +174,7 @@ export default async function ProductDetailPage({
                     {row.createdAt.toISOString().slice(0, 10)}
                   </td>
                   <td className="px-5 py-2 font-mono">
-                    ${(row.price / 100).toFixed(2)}
+                    {formatPrice(row.price)}
                   </td>
                   <td
                     className={cn(

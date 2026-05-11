@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Loader2, AlertCircle, Star } from "lucide-react";
+import { formatPrice, hasPrice } from "@/lib/price";
 
 const previewCache = new Map<string, ProductPreview>();
 
@@ -239,8 +240,13 @@ function PreviewBlock({ state }: { state: PreviewState }) {
         <p className="text-sm font-medium text-foreground line-clamp-2">
           {data.title}
         </p>
-        <p className="mt-1 text-base font-semibold text-foreground">
-          ${(data.price / 100).toFixed(2)}
+        <p
+          className={cn(
+            "mt-1 text-base font-semibold",
+            hasPrice(data.price) ? "text-foreground" : "text-muted-foreground"
+          )}
+        >
+          {formatPrice(data.price)}
         </p>
         <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
           <Star className="h-3 w-3 fill-primary text-primary" />

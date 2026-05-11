@@ -124,7 +124,7 @@ export default function DashboardProductCard({
   async function handleDelete(id: number) {
     setIsDeleting(true);
     const response = await deleteProduct(id);
-    if (response) {
+    if (response.ok) {
       toast.success("Item was deleted successfully!");
       router.refresh();
     } else {

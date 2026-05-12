@@ -18,7 +18,7 @@ function truncate(s: string, max = 300) {
  * RapidAPI returns prices as US-formatted strings like "2,640.61" or "$2,640.61".
  * `parseFloat` stops at the first comma → strip non-numeric characters first.
  */
-function parseLocalizedNumber(raw: string | null | undefined): number {
+export function parseLocalizedNumber(raw: string | null | undefined): number {
   if (!raw) return 0;
   const cleaned = raw.replace(/[^0-9.]/g, "");
   const n = parseFloat(cleaned);

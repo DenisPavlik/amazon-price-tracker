@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -6,9 +8,11 @@ import {
   TrendingDownIcon,
   TrendingUpIcon,
 } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 import type { ActivityItem } from "@/lib/queries";
+import { listContainer, slideInFromLeft } from "@/components/motion-variants";
 
 const KIND_META = {
   PRICE_DROP: {
@@ -41,6 +45,7 @@ function formatDelta(from: number | null, to: number) {
 }
 
 export default function RecentActivity({ items }: { items: ActivityItem[] }) {
+  const reduce = useReducedMotion();
   if (items.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-6 text-center text-sm text-muted-foreground">
@@ -50,7 +55,12 @@ export default function RecentActivity({ items }: { items: ActivityItem[] }) {
   }
 
   return (
-    <ul className="flex flex-col gap-2">
+    <motion.ul
+      className="flex flex-col gap-2"
+      variants={listContainer}
+      initial={reduce ? false : "hidden"}
+      animate="show"
+    >
       {items.map((item) => {
         const meta = KIND_META[item.kind];
         const delta = formatDelta(item.priceFrom, item.priceTo);
@@ -60,7 +70,7 @@ export default function RecentActivity({ items }: { items: ActivityItem[] }) {
             : meta.Icon;
 
         return (
-          <li key={item.id}>
+          <motion.li key={item.id} variants={slideInFromLeft}>
             <Link
               href={`/product/${item.amazonId}`}
               className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/70 px-3 py-2.5 transition-colors hover:bg-accent/40 hover:border-primary/40"
@@ -120,9 +130,9 @@ export default function RecentActivity({ items }: { items: ActivityItem[] }) {
                 </div>
               )}
             </Link>
-          </li>
+          </motion.li>
         );
       })}
-    </ul>
+    </motion.ul>
   );
 }

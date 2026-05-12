@@ -10,8 +10,10 @@ import {
   Trash2Icon,
   TrendingDownIcon,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { slideInFromLeft } from "@/components/motion-variants";
 import {
   deleteNotification,
   markRead,
@@ -80,7 +82,8 @@ export default function NotificationCard(props: Props) {
   };
 
   return (
-    <li
+    <motion.li
+      variants={slideInFromLeft}
       className={cn(
         "group relative flex items-stretch gap-3 rounded-xl border bg-card/70 px-3 py-3 transition-colors hover:bg-accent/40 hover:border-primary/40",
         props.isRead
@@ -180,6 +183,6 @@ export default function NotificationCard(props: Props) {
           <Trash2Icon className="size-4" />
         </Button>
       </div>
-    </li>
+    </motion.li>
   );
 }

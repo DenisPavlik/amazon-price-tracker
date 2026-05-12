@@ -11,6 +11,7 @@ import {
   UserCircleIcon,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +53,7 @@ export default function BottomTabBar({
 }: BottomTabBarProps) {
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
+  const reduce = useReducedMotion();
   const isActive = (href: string) => isActivePath(pathname, href);
   const addActive = isActive("/add-product");
 
@@ -71,20 +73,26 @@ export default function BottomTabBar({
           ))}
 
           <div className="relative flex items-center justify-center">
-            <Link
-              href="/add-product"
-              aria-label="Add product"
-              className={cn(
-                "absolute -top-6 size-14 rounded-full grid place-items-center",
-                "bg-gradient-to-br from-[#FF9900] to-[#FF6600] text-white",
-                "shadow-lg shadow-orange-500/30 transition-transform",
-                "hover:scale-105 active:scale-95",
-                addActive &&
-                  "ring-2 ring-primary/60 ring-offset-2 ring-offset-background"
-              )}
+            <motion.div
+              className="absolute -top-6"
+              whileTap={reduce ? undefined : { scale: 0.88 }}
+              whileHover={reduce ? undefined : { scale: 1.06 }}
+              transition={{ type: "spring", stiffness: 400, damping: 14 }}
             >
-              <PlusIcon className="size-6" />
-            </Link>
+              <Link
+                href="/add-product"
+                aria-label="Add product"
+                className={cn(
+                  "size-14 rounded-full grid place-items-center",
+                  "bg-gradient-to-br from-[#FF9900] to-[#FF6600] text-white",
+                  "shadow-lg shadow-orange-500/30",
+                  addActive &&
+                    "ring-2 ring-primary/60 ring-offset-2 ring-offset-background"
+                )}
+              >
+                <PlusIcon className="size-6" />
+              </Link>
+            </motion.div>
           </div>
 
           {RIGHT_TABS.map((tab) => (
@@ -93,6 +101,7 @@ export default function BottomTabBar({
               tab={tab}
               active={isActive(tab.href)}
               badge={tab.href === "/notifications" ? unreadCount : 0}
+              reduce={reduce ?? false}
             />
           ))}
 
@@ -154,10 +163,12 @@ function TabLink({
   tab,
   active,
   badge = 0,
+  reduce = false,
 }: {
   tab: TabItem;
   active: boolean;
   badge?: number;
+  reduce?: boolean;
 }) {
   const Icon = tab.icon;
   return (
@@ -170,11 +181,20 @@ function TabLink({
     >
       <div className="relative">
         <Icon className="size-5" />
-        {badge > 0 && (
-          <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-gradient-to-r from-[#FF9900] to-[#FF6600] text-[10px] font-semibold text-white grid place-items-center shadow-sm shadow-orange-500/40">
-            {badge > 99 ? "99+" : badge}
-          </span>
-        )}
+        <AnimatePresence mode="popLayout">
+          {badge > 0 && (
+            <motion.span
+              key={badge}
+              initial={reduce ? false : { scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={reduce ? undefined : { scale: 0.4, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 18 }}
+              className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-gradient-to-r from-[#FF9900] to-[#FF6600] text-[10px] font-semibold text-white grid place-items-center shadow-sm shadow-orange-500/40"
+            >
+              {badge > 99 ? "99+" : badge}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </div>
       <span>{tab.label}</span>
     </Link>

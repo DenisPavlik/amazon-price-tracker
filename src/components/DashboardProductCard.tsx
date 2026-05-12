@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion, useReducedMotion } from "motion/react";
 
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
@@ -121,6 +122,7 @@ export default function DashboardProductCard({
       : 0;
 
   const rating = product.reviewsAverageRating / 10;
+  const reduce = useReducedMotion();
 
   async function handleDelete(id: number) {
     setIsDeleting(true);
@@ -136,11 +138,15 @@ export default function DashboardProductCard({
   }
 
   return (
+    <motion.div
+      whileHover={reduce ? undefined : { scale: 1.015, y: -2 }}
+      transition={{ type: "spring", stiffness: 200, damping: 25 }}
+      className="relative"
+    >
     <Card
       className={cn(
-        "relative overflow-hidden p-0 group transition-all duration-300",
+        "relative overflow-hidden p-0 group transition-shadow duration-300",
         "hover:shadow-[0_0_0_1px_var(--primary),0_10px_40px_-12px_rgb(255_153_0_/_0.35)]",
-        "hover:-translate-y-0.5",
         isUnavailable && "opacity-60 saturate-50"
       )}
     >
@@ -280,5 +286,6 @@ export default function DashboardProductCard({
         </Dialog>
       </div>
     </Card>
+    </motion.div>
   );
 }

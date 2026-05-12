@@ -1,28 +1,45 @@
 import { prisma } from "@/lib/db";
 import { productScraper } from "@/lib/productScraper";
 import { endOfDay, isToday, startOfDay, subDays } from "date-fns";
+import type { NextRequest } from "next/server";
 
-export async function GET() {
+function shorten(title: string, max = 60) {
+  return title.length > max ? title.slice(0, max) + "..." : title;
+}
+
+export async function GET(req: NextRequest) {
+  const expected = process.env.CRON_SECRET;
+  if (!expected) {
+    return new Response("Server misconfigured", { status: 500 });
+  }
+  const auth = req.headers.get("authorization");
+  if (auth !== `Bearer ${expected}`) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const products = await prisma.product.findMany();
   for (const product of products) {
     const latestHistoryDbData = await prisma.productDataHistory.findFirst({
-      where: {
-        amazonId: product.amazonId,
-      },
+      where: { amazonId: product.amazonId },
       orderBy: { createdAt: "desc" },
     });
     if (latestHistoryDbData && isToday(latestHistoryDbData.createdAt)) {
       continue;
     }
+
     const newProductData = await productScraper(product.amazonId);
-    await prisma.productDataHistory.create({
-      data: newProductData,
-    });
+    await prisma.productDataHistory.create({ data: newProductData });
+
+    const newLowest =
+      product.lowestPrice == null
+        ? newProductData.price
+        : Math.min(product.lowestPrice, newProductData.price);
 
     await prisma.product.update({
       where: { id: product.id },
       data: {
         price: newProductData.price,
+        lowestPrice: newLowest,
         updatedAt: new Date(),
       },
     });
@@ -37,18 +54,37 @@ export async function GET() {
       },
     });
 
+    const shortTitle = shorten(product.title);
+
     if (prevDayData && prevDayData.price > newProductData.price) {
-      const shortTitle =
-        product.title.length > 60
-          ? product.title.slice(0, 60) + "..."
-          : product.title;
       await prisma.notification.create({
         data: {
           userEmail: product.userEmail,
           amazonId: product.amazonId,
-          title: `The prise of ${shortTitle} was decreased from ${
-            prevDayData.price / 100
-          }USD to ${newProductData.price / 100}USD`,
+          productId: product.id,
+          kind: "PRICE_DROP",
+          priceFrom: prevDayData.price,
+          priceTo: newProductData.price,
+          title: shortTitle,
+        },
+      });
+    }
+
+    const crossedTarget =
+      product.targetPrice != null &&
+      product.price > product.targetPrice &&
+      newProductData.price <= product.targetPrice;
+
+    if (crossedTarget) {
+      await prisma.notification.create({
+        data: {
+          userEmail: product.userEmail,
+          amazonId: product.amazonId,
+          productId: product.id,
+          kind: "TARGET_HIT",
+          priceFrom: product.targetPrice!,
+          priceTo: newProductData.price,
+          title: shortTitle,
         },
       });
     }

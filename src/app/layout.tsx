@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import LoginView from "@/components/LoginView";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import BottomTabBar from "@/components/BottomTabBar";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -29,7 +30,10 @@ export const metadata: Metadata = {
   title: "AmzPulse — Amazon Price Tracker",
   description: "AmzPulse tracks Amazon prices and notifies you the moment they drop.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
   },
 };
 
@@ -41,7 +45,7 @@ export default async function RootLayout({
   const session = await auth();
   const unreadCount = session?.user?.email
     ? await prisma.notification.count({
-        where: { userEmail: session.user.email },
+        where: { userEmail: session.user.email, isRead: false },
       })
     : 0;
 
@@ -57,7 +61,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {session ? (
-            <div className="w-full max-w-[1440px] mx-auto p-4 min-h-screen">
+            <div className="w-full max-w-[1440px] mx-auto p-4 min-h-screen pb-24 md:pb-4">
               <Header
                 image={session.user?.image ?? undefined}
                 username={session.user?.name ?? "User"}
@@ -69,6 +73,12 @@ export default async function RootLayout({
                 </div>
                 {children}
               </section>
+              <BottomTabBar
+                unreadCount={unreadCount}
+                image={session.user?.image ?? undefined}
+                username={session.user?.name ?? "User"}
+                email={session.user?.email ?? undefined}
+              />
             </div>
           ) : (
             <LoginView />

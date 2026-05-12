@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication
+
+Always respond in Ukrainian.
+
 ## Commands
 
 Package manager is **bun** (see `bun.lockb`).
@@ -17,8 +21,9 @@ There is no test runner configured.
 ## Required environment variables
 
 - `DATABASE_URL` — PostgreSQL connection string (Prisma datasource)
-- `RAINFOREST_API_KEY` — Rainforest API key for Amazon product scraping
+- `RAPIDAPI_KEY` — RapidAPI key for the Real-Time Amazon Data API (used by `productScraper`)
 - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` and `AUTH_SECRET` — NextAuth v5 with Google provider
+- `CRON_SECRET` — shared secret required by `GET /api/products/refresh`; cron must send `Authorization: Bearer ${CRON_SECRET}`
 
 Local env lives in `.env.local`.
 
@@ -47,13 +52,32 @@ Prices are stored as integer cents; ratings are stored as integer × 10 (see `pr
 
 ### Scraping & refresh job
 
-- `src/lib/productScraper.ts` calls Rainforest API (`api.rainforestapi.com`) by ASIN; returns the shape used by both `Product` and `ProductDataHistory`.
+- `src/lib/productScraper.ts` calls the RapidAPI Real-Time Amazon Data endpoint (`real-time-amazon-data.p.rapidapi.com/product-details`) by ASIN; returns the shape used by both `Product` and `ProductDataHistory`. Throws `ScraperError` with `kind: "quota_exceeded" | "fetch_failed"` so server actions can branch on it.
 - `src/app/api/products/refresh/route.ts` is a `GET` endpoint that iterates every `Product`, skips any that already have a `ProductDataHistory` row created today (`isToday`), otherwise scrapes a new snapshot, updates the `Product` price, and creates a `Notification` if yesterday's price was higher than today's. This route is intended to be hit by an external scheduler (cron) — it is **not** auth-scoped and processes all users in one pass.
 
-Note: `puppeteer` is a dependency but the active scraper uses Rainforest; Puppeteer code may be legacy/unused.
 
 ### UI structure
 
 - `src/app/page.tsx` is the dashboard entry; major views live in `src/components/` (`Dashboard`, `Sidebar`, `LoginView`, `AddProductForm`, `LineChart`, etc.).
 - `src/components/ui/` is shadcn/ui-generated; `components.json` configures shadcn. Re-running shadcn add will overwrite these.
 - Image domain `m.media-amazon.com` is whitelisted in `next.config.ts` for `next/image`.
+
+## Coding Principles
+
+Adapted from [Karpathy coding principles](https://github.com/forrestchang/andrej-karpathy-skills). User-facing responses remain in Ukrainian (see "Communication").
+
+### 1. Think Before Coding
+
+Surface assumptions and uncertainties before editing. If a request has two valid readings (e.g. "add a notification" — `PRICE_DROP` or `TARGET_HIT`?), stop and ask rather than silently picking one. The same applies to the Prisma schema, the price-in-cents convention, and the `userEmail` tenant scope — clarify first if it isn't obvious from the code.
+
+### 2. Simplicity First
+
+Write the minimum code that solves the stated problem. No speculative abstractions, "future-proof" helpers, or feature flags. Check: would a senior engineer call this overcomplicated? In this project that means: don't add layers on top of server actions / `@/lib/db`, don't duplicate scraper logic, and don't build new UI components if `src/components/ui/` already has the right shadcn primitive.
+
+### 3. Surgical Changes
+
+Edit only what the request requires. Match the existing style (Tailwind v4, shadcn, server actions with `await auth()`); don't refactor neighboring files "while you're there." Every changed line must trace directly to the task. If you spot an unrelated issue, file it separately — don't mix it into the current PR.
+
+### 4. Goal-Driven Execution
+
+Restate the task as measurable success criteria before starting. For features from `PLAN.md`, sync with the phase checklist; for bugs, describe how to reproduce and verify. After changes: `bun run lint` and `bun run build` (which includes `prisma generate`) as the minimum gate, plus manual checks via `bun dev`, since there is no test runner.

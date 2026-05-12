@@ -1,11 +1,42 @@
 import { auth } from "@/auth";
 import DashboardProductCard from "./DashboardProductCard";
-import DashboardTopCard from "./DashboardTopCard";
+import TopDropCard from "./TopDropCard";
 import { prisma } from "@/lib/db";
-import { groupBy, sum } from "lodash";
+import {
+  getTopDropsThisWeek,
+  getTotalSavingsAllTime,
+} from "@/lib/queries";
 import Link from "next/link";
+import MobileFiltersSheet from "./MobileFiltersSheet";
+import type { Product, ProductDataHistory } from "@/lib/types";
 
-export default async function Dashboard() {
+type SortKey =
+  | "newest"
+  | "oldest"
+  | "drop"
+  | "price-asc"
+  | "price-desc"
+  | "rating";
+
+const SORT_KEYS: SortKey[] = [
+  "newest",
+  "oldest",
+  "drop",
+  "price-asc",
+  "price-desc",
+  "rating",
+];
+
+const isSort = (v: string | undefined): v is SortKey =>
+  !!v && (SORT_KEYS as string[]).includes(v);
+
+export default async function Dashboard({
+  sort,
+  q,
+}: {
+  sort?: string;
+  q?: string;
+}) {
   const session = await auth();
   const user = session?.user;
   if (!user || !user.email) {
@@ -13,9 +44,7 @@ export default async function Dashboard() {
   }
 
   const products = await prisma.product.findMany({
-    where: {
-      userEmail: user.email,
-    },
+    where: { userEmail: user.email },
   });
 
   if (products.length < 1) {
@@ -40,76 +69,143 @@ export default async function Dashboard() {
 
   const productIds = products.map((product) => product.amazonId);
   const history = await prisma.productDataHistory.findMany({
-    where: {
-      amazonId: {
-        in: productIds,
-      },
-    },
-    orderBy: {
-      createdAt: "asc",
-    },
+    where: { amazonId: { in: productIds } },
+    orderBy: { createdAt: "asc" },
   });
 
-  const historyByDates = groupBy(history, (h) =>
-    h.createdAt.toISOString().slice(0, 10)
+  const [totalSavings, topDrops] = await Promise.all([
+    getTotalSavingsAllTime(user.email),
+    getTopDropsThisWeek(user.email, 3),
+  ]);
+
+  const sortKey: SortKey = isSort(sort) ? sort : "newest";
+  const search = q?.trim().toLowerCase() ?? "";
+  const filteredProducts = applyFilters(products, history, sortKey, search);
+
+  return (
+    <div className="col-span-12 md:col-span-9 p-4 space-y-6 md:space-y-8">
+      <section>
+        <header className="flex items-end justify-between gap-2 md:gap-4 mb-3">
+          <h2 className="font-display text-xl font-semibold tracking-tight">
+            Top Drops This Week
+          </h2>
+          <div className="text-sm text-muted-foreground text-right">
+            Total Savings:{" "}
+            <span
+              className="font-display font-semibold"
+              style={{ color: "var(--chart-green)" }}
+            >
+              ${(totalSavings / 100).toFixed(2)}
+            </span>
+          </div>
+        </header>
+        {topDrops.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {topDrops.map((deal) => (
+              <TopDropCard key={deal.product.id} deal={deal} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-6 text-center text-sm text-muted-foreground">
+            No drops this week yet.
+          </div>
+        )}
+      </section>
+
+      <section>
+        <header className="flex items-end justify-between gap-2 md:gap-4 mb-3">
+          <h2 className="font-display text-xl font-semibold tracking-tight">
+            All Items
+          </h2>
+          <div className="flex items-center gap-2">
+            <MobileFiltersSheet />
+            <div className="text-sm text-muted-foreground">
+              <span className="font-display font-semibold text-foreground">
+                {filteredProducts.length === products.length
+                  ? products.length
+                  : `${filteredProducts.length} / ${products.length}`}
+              </span>{" "}
+              tracked
+            </div>
+          </div>
+        </header>
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {filteredProducts.map((product) => (
+              <DashboardProductCard
+                key={product.id}
+                product={product}
+                history={history.filter(
+                  (h) => h.amazonId === product.amazonId
+                )}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-6 text-center text-sm text-muted-foreground">
+            No products match your filters.
+          </div>
+        )}
+      </section>
+    </div>
   );
+}
 
-  const reviewsAvgs: { x: string; rating: number }[] = [];
-
-  for (const date of Object.keys(historyByDates).sort()) {
-    const dateRatings = historyByDates[date].map(
-      (hp) => hp.reviewsAverageRating / 10
-    );
-    reviewsAvgs.push({
-      x: date,
-      rating: sum(dateRatings) / dateRatings.length,
-    });
+function applyFilters(
+  products: Product[],
+  history: ProductDataHistory[],
+  sort: SortKey,
+  search: string
+): Product[] {
+  let result = products;
+  if (search) {
+    result = result.filter((p) => p.title.toLowerCase().includes(search));
   }
 
-  const latestAvg =
-    reviewsAvgs.length > 0 ? reviewsAvgs[reviewsAvgs.length - 1].rating : 0;
-
-  let totalSavings = 0;
-
-  for (const product of products) {
-    const productHistory = history.filter(
-      (h) => h.amazonId === product.amazonId
-    );
-
-    if (productHistory.length >= 2) {
-      const initialPrice = productHistory[0].price;
-      const latestPrice = productHistory[productHistory.length - 1].price;
-
-      if (latestPrice < initialPrice) {
-        totalSavings += initialPrice - latestPrice;
-      }
+  const dropPctByAsin = new Map<string, number>();
+  if (sort === "drop") {
+    for (const product of result) {
+      const productHistory = history.filter(
+        (h) => h.amazonId === product.amazonId
+      );
+      const initialPrice = productHistory.length
+        ? productHistory[0].price
+        : product.price;
+      const latestPrice = productHistory.length
+        ? productHistory[productHistory.length - 1].price
+        : product.price;
+      const pct =
+        initialPrice > 0
+          ? ((initialPrice - latestPrice) / initialPrice) * 100
+          : 0;
+      dropPctByAsin.set(product.amazonId, pct);
     }
   }
 
-  return (
-    <div className="col-span-12 md:col-span-9 p-4">
-      <h2 className="font-bold uppercase text-lg text-gray-600 mb-2">
-        Dashboard
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <DashboardTopCard
-          title="Total Savings 💸"
-          value={`$${(totalSavings / 100).toFixed(2)}`}
-        />
-        <DashboardTopCard title="Reviews ⭐️" value={latestAvg.toFixed(1)} />
-        <DashboardTopCard title="Tracked Items" value={`${products.length}`} />
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        {products.map((product) => (
-          <DashboardProductCard
-            key={product.id}
-            product={product}
-            history={history.filter(
-              (history) => history.amazonId === product.amazonId
-            )}
-          />
-        ))}
-      </div>
-    </div>
-  );
+  const sorted = [...result];
+  switch (sort) {
+    case "drop":
+      sorted.sort(
+        (a, b) =>
+          (dropPctByAsin.get(b.amazonId) ?? 0) -
+          (dropPctByAsin.get(a.amazonId) ?? 0)
+      );
+      break;
+    case "price-asc":
+      sorted.sort((a, b) => a.price - b.price);
+      break;
+    case "price-desc":
+      sorted.sort((a, b) => b.price - a.price);
+      break;
+    case "rating":
+      sorted.sort((a, b) => b.reviewsAverageRating - a.reviewsAverageRating);
+      break;
+    case "oldest":
+      sorted.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      break;
+    case "newest":
+    default:
+      sorted.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+  return sorted;
 }

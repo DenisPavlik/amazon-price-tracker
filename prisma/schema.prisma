@@ -14,6 +14,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Price fields (`price`, `targetPrice`, `lowestPrice`) are stored as integer **cents**.
+/// `reviewsAverageRating` is the star rating × 10 stored as Int (e.g. 4.2 → 42).
+/// UI must divide accordingly when rendering.
 model Product {
   id                   Int      @id @default(autoincrement())
   userEmail            String
@@ -23,12 +26,17 @@ model Product {
   price                Int
   reviewsCount         Int
   reviewsAverageRating Int
+  targetPrice          Int?
+  lowestPrice          Int?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+
+  notifications Notification[]
 
   @@unique([amazonId, userEmail])
 }
 
+/// `price` in cents; `reviewsAverageRating` is star rating × 10 (see Product).
 model ProductDataHistory {
   id                   Int      @id @default(autoincrement())
   amazonId             String
@@ -38,12 +46,29 @@ model ProductDataHistory {
   reviewsCount         Int
   reviewsAverageRating Int
   createdAt            DateTime @default(now())
+
+  @@index([amazonId, createdAt(sort: Desc)])
+}
+
+enum NotificationKind {
+  PRICE_DROP
+  TARGET_HIT
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
+  id        Int              @id @default(autoincrement())
   userEmail String
   amazonId  String
   title     String
-  createdAt DateTime @default(now())
+  kind      NotificationKind @default(PRICE_DROP)
+  priceFrom Int?
+  priceTo   Int?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([userEmail, isRead])
+  @@index([userEmail, createdAt(sort: Desc)])
 }

@@ -7,6 +7,7 @@ import LoginView from "@/components/LoginView";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import BottomTabBar from "@/components/BottomTabBar";
+import PageTransition from "@/components/PageTransition";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -71,7 +72,7 @@ export default async function RootLayout({
                 <div className="hidden md:block col-span-3 pb-4">
                   <Sidebar />
                 </div>
-                {children}
+                <PageTransition>{children}</PageTransition>
               </section>
               <BottomTabBar
                 unreadCount={unreadCount}

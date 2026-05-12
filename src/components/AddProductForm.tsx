@@ -14,7 +14,29 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Loader2, AlertCircle, Star } from "lucide-react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  type Variants,
+} from "motion/react";
 import { formatPrice, hasPrice } from "@/lib/price";
+
+const formContainer: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.1, delayChildren: 0.05 },
+  },
+};
+
+const formItem: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: "easeOut" },
+  },
+};
 
 const previewCache = new Map<string, ProductPreview>();
 
@@ -26,6 +48,7 @@ type PreviewState =
 
 export default function AddProductForm() {
   const router = useRouter();
+  const reduce = useReducedMotion();
   const [input, setInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState<PreviewState>({ status: "idle" });
@@ -116,20 +139,23 @@ export default function AddProductForm() {
   }
 
   return (
-    <div
+    <motion.div
       className={cn(
         "rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm",
         "p-4 md:p-6 shadow-sm space-y-5"
       )}
+      variants={formContainer}
+      initial={reduce ? false : "hidden"}
+      animate="show"
     >
-      <div className="space-y-2">
+      <motion.div variants={formItem} className="space-y-2">
         <h1 className="text-lg font-semibold text-foreground">Track a product</h1>
         <p className="text-sm text-muted-foreground">
           Paste an Amazon URL or a 10-character ASIN. We&apos;ll preview it before tracking.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="space-y-1.5">
+      <motion.div variants={formItem} className="space-y-1.5">
         <label
           htmlFor="productId"
           className="text-[11px] uppercase tracking-wider text-muted-foreground"
@@ -156,11 +182,25 @@ export default function AddProductForm() {
             )}
           />
         </div>
-      </div>
+      </motion.div>
 
-      <PreviewBlock state={preview} />
+      <motion.div variants={formItem}>
+        <AnimatePresence mode="wait" initial={false}>
+          {preview.status !== "idle" && (
+            <motion.div
+              key={preview.status}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+            >
+              <PreviewBlock state={preview} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
-      <div className="flex justify-end">
+      <motion.div variants={formItem} className="flex justify-end">
         <Button
           type="button"
           onClick={handleConfirm}
@@ -180,8 +220,8 @@ export default function AddProductForm() {
             "Confirm & track"
           )}
         </Button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

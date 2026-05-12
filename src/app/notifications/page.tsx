@@ -1,7 +1,7 @@
 import { BellIcon } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import NotificationCard from "@/components/NotificationCard";
+import AnimatedNotificationGroups from "@/components/AnimatedNotificationGroups";
 import MarkAllReadButton from "@/components/MarkAllReadButton";
 
 type Bucket = "Today" | "Yesterday" | "Earlier";
@@ -33,12 +33,12 @@ export default async function Notifications() {
     include: { product: true },
   });
 
-  const groups: Record<Bucket, typeof notifications> = {
+  const groups: Record<Bucket, ReturnType<typeof toItem>[]> = {
     Today: [],
     Yesterday: [],
     Earlier: [],
   };
-  for (const n of notifications) groups[bucketFor(n.createdAt)].push(n);
+  for (const n of notifications) groups[bucketFor(n.createdAt)].push(toItem(n));
 
   const hasUnread = notifications.some((n) => !n.isRead);
 
@@ -60,34 +60,32 @@ export default async function Notifications() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-6">
-          {(["Today", "Yesterday", "Earlier"] as const).map((bucket) =>
-            groups[bucket].length === 0 ? null : (
-              <section key={bucket}>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  {bucket}
-                </h3>
-                <ul className="flex flex-col gap-2">
-                  {groups[bucket].map((n) => (
-                    <NotificationCard
-                      key={n.id}
-                      id={n.id}
-                      kind={n.kind}
-                      title={n.title}
-                      amazonId={n.amazonId}
-                      isRead={n.isRead}
-                      priceFrom={n.priceFrom}
-                      priceTo={n.priceTo}
-                      createdAt={n.createdAt}
-                      productImg={n.product?.img ?? null}
-                    />
-                  ))}
-                </ul>
-              </section>
-            )
-          )}
-        </div>
+        <AnimatedNotificationGroups groups={groups} />
       )}
     </div>
   );
+}
+
+function toItem(n: {
+  id: number;
+  kind: string;
+  title: string;
+  amazonId: string;
+  isRead: boolean;
+  priceFrom: number | null;
+  priceTo: number | null;
+  createdAt: Date;
+  product: { img: string } | null;
+}) {
+  return {
+    id: n.id,
+    kind: n.kind as "PRICE_DROP" | "TARGET_HIT",
+    title: n.title,
+    amazonId: n.amazonId,
+    isRead: n.isRead,
+    priceFrom: n.priceFrom,
+    priceTo: n.priceTo,
+    createdAt: n.createdAt,
+    productImg: n.product?.img ?? null,
+  };
 }

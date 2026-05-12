@@ -162,23 +162,23 @@ export default async function ProductDetailPage({
           <table className="w-full text-sm">
             <thead className="text-left text-muted-foreground">
               <tr className="border-b border-border/60">
-                <th className="px-5 py-2 font-medium">Date</th>
-                <th className="px-5 py-2 font-medium">Price</th>
-                <th className="px-5 py-2 font-medium">Δ vs previous</th>
+                <th className="px-3 md:px-5 py-2 font-medium">Date</th>
+                <th className="px-3 md:px-5 py-2 font-medium">Price</th>
+                <th className="px-3 md:px-5 py-2 font-medium">Δ vs previous</th>
               </tr>
             </thead>
             <tbody>
               {tableRows.map((row) => (
                 <tr key={row.id} className="border-b border-border/40 last:border-0">
-                  <td className="px-5 py-2 text-muted-foreground">
+                  <td className="px-3 md:px-5 py-2 text-muted-foreground">
                     {row.createdAt.toISOString().slice(0, 10)}
                   </td>
-                  <td className="px-5 py-2 font-mono">
+                  <td className="px-3 md:px-5 py-2 font-mono">
                     {formatPrice(row.price)}
                   </td>
                   <td
                     className={cn(
-                      "px-5 py-2 font-mono",
+                      "px-3 md:px-5 py-2 font-mono",
                       row.delta < 0 && "text-emerald-500",
                       row.delta > 0 && "text-red-500",
                       row.delta === 0 && "text-muted-foreground"

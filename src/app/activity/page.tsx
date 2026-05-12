@@ -11,7 +11,7 @@ export default async function ActivityPage() {
 
   return (
     <div className="col-span-12 md:col-span-9 p-4 space-y-4">
-      <header className="flex items-end justify-between gap-4">
+      <header className="flex items-end justify-between gap-2 md:gap-4">
         <h1 className="font-display text-xl font-semibold tracking-tight">
           Activity
         </h1>

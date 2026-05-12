@@ -44,7 +44,7 @@ export default async function Notifications() {
 
   return (
     <div className="col-span-12 md:col-span-9 p-4">
-      <div className="flex items-center justify-between gap-4 my-2">
+      <div className="flex items-center justify-between gap-2 md:gap-4 my-2">
         <h2 className="font-bold uppercase text-lg text-muted-foreground">
           Notifications
         </h2>

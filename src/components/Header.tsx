@@ -95,7 +95,7 @@ export default function Header({ image, username, unreadCount = 0 }: HeaderProps
         </div>
       </Link>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-0.5 sm:gap-1.5">
         <Link
           href="/notifications"
           aria-label="Notifications"
@@ -114,21 +114,23 @@ export default function Header({ image, username, unreadCount = 0 }: HeaderProps
 
         <ThemeToggle />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger className="ml-1 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full">
-            <Avatar className="ring-1 ring-border">
-              <AvatarImage src={image} />
-              <AvatarFallback>{username.charAt(0)}</AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              <Button className="w-full" onClick={() => signOut()}>
-                Log out
-              </Button>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="hidden md:block">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="ml-1 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full">
+              <Avatar className="ring-1 ring-border">
+                <AvatarImage src={image} />
+                <AvatarFallback>{username.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuGroup>
+                <Button className="w-full" onClick={() => signOut()}>
+                  Log out
+                </Button>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );

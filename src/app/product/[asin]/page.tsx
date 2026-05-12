@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import ProductDetailChart from "@/components/ProductDetailChart";
 import SetTargetPriceForm from "@/components/SetTargetPriceForm";
+import RevealSection from "@/components/RevealSection";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/price";
 
@@ -90,6 +91,7 @@ export default async function ProductDetailPage({
         </Button>
       </div>
 
+      <RevealSection>
       <Card className="p-5 md:p-6 flex flex-col md:flex-row gap-5 md:gap-6">
         <div className="relative size-32 md:size-40 shrink-0 rounded-xl overflow-hidden bg-muted/40 border border-border/60">
           <Image
@@ -131,8 +133,9 @@ export default async function ProductDetailPage({
           </div>
         </div>
       </Card>
+      </RevealSection>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <RevealSection delay={0.1} className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Stat label="Current" value={fmtPrice(latest)} />
         <Stat label="Lowest" value={fmtPrice(lowest)} accent="green" />
         <Stat label="Highest" value={fmtPrice(highest)} accent="red" />
@@ -143,15 +146,18 @@ export default async function ProductDetailPage({
             change30Pct < 0 ? "green" : change30Pct > 0 ? "red" : "neutral"
           }
         />
-      </div>
+      </RevealSection>
 
+      <RevealSection delay={0.2}>
       <Card className="p-4 md:p-5">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
           Price history
         </h2>
         <ProductDetailChart data={chartData} trend={trend} />
       </Card>
+      </RevealSection>
 
+      <RevealSection delay={0.3}>
       <Card className="p-0 overflow-hidden">
         <div className="px-5 py-4 border-b border-border/60">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -196,6 +202,7 @@ export default async function ProductDetailPage({
           </table>
         </div>
       </Card>
+      </RevealSection>
     </div>
   );
 }

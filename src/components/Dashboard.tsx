@@ -8,6 +8,7 @@ import {
 } from "@/lib/queries";
 import Link from "next/link";
 import MobileFiltersSheet from "./MobileFiltersSheet";
+import StaggerGrid from "./StaggerGrid";
 import type { Product, ProductDataHistory } from "@/lib/types";
 
 type SortKey =
@@ -100,11 +101,11 @@ export default async function Dashboard({
           </div>
         </header>
         {topDrops.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StaggerGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {topDrops.map((deal) => (
               <TopDropCard key={deal.product.id} deal={deal} />
             ))}
-          </div>
+          </StaggerGrid>
         ) : (
           <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-6 text-center text-sm text-muted-foreground">
             No drops this week yet.
@@ -130,7 +131,7 @@ export default async function Dashboard({
           </div>
         </header>
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <StaggerGrid className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {filteredProducts.map((product) => (
               <DashboardProductCard
                 key={product.id}
@@ -140,7 +141,7 @@ export default async function Dashboard({
                 )}
               />
             ))}
-          </div>
+          </StaggerGrid>
         ) : (
           <div className="rounded-xl border border-dashed border-border/60 bg-card/40 p-6 text-center text-sm text-muted-foreground">
             No products match your filters.

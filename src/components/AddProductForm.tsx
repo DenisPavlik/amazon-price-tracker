@@ -119,7 +119,7 @@ export default function AddProductForm() {
     <div
       className={cn(
         "rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm",
-        "p-6 shadow-sm space-y-5"
+        "p-4 md:p-6 shadow-sm space-y-5"
       )}
     >
       <div className="space-y-2">
@@ -191,7 +191,7 @@ function PreviewBlock({ state }: { state: PreviewState }) {
   if (state.status === "loading") {
     return (
       <div className="rounded-lg border border-border/60 bg-card/60 backdrop-blur-sm p-3 flex gap-3">
-        <div className="h-20 w-20 shrink-0 rounded-md bg-muted animate-pulse" />
+        <div className="h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-md bg-muted animate-pulse" />
         <div className="flex-1 space-y-2 py-1">
           <div className="h-3.5 w-3/4 rounded bg-muted animate-pulse" />
           <div className="h-3.5 w-1/2 rounded bg-muted animate-pulse" />
@@ -225,7 +225,7 @@ function PreviewBlock({ state }: { state: PreviewState }) {
         "p-3 flex gap-3"
       )}
     >
-      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-muted">
+      <div className="relative h-16 w-16 md:h-20 md:w-20 shrink-0 overflow-hidden rounded-md bg-muted">
         {data.img ? (
           <Image
             src={data.img}

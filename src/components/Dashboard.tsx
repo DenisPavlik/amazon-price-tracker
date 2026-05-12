@@ -7,6 +7,7 @@ import {
   getTotalSavingsAllTime,
 } from "@/lib/queries";
 import Link from "next/link";
+import MobileFiltersSheet from "./MobileFiltersSheet";
 import type { Product, ProductDataHistory } from "@/lib/types";
 
 type SortKey =
@@ -82,13 +83,13 @@ export default async function Dashboard({
   const filteredProducts = applyFilters(products, history, sortKey, search);
 
   return (
-    <div className="col-span-12 md:col-span-9 p-4 space-y-8">
+    <div className="col-span-12 md:col-span-9 p-4 space-y-6 md:space-y-8">
       <section>
-        <header className="flex items-end justify-between gap-4 mb-3">
+        <header className="flex items-end justify-between gap-2 md:gap-4 mb-3">
           <h2 className="font-display text-xl font-semibold tracking-tight">
             Top Drops This Week
           </h2>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground text-right">
             Total Savings:{" "}
             <span
               className="font-display font-semibold"
@@ -112,17 +113,20 @@ export default async function Dashboard({
       </section>
 
       <section>
-        <header className="flex items-end justify-between gap-4 mb-3">
+        <header className="flex items-end justify-between gap-2 md:gap-4 mb-3">
           <h2 className="font-display text-xl font-semibold tracking-tight">
             All Items
           </h2>
-          <div className="text-sm text-muted-foreground">
-            <span className="font-display font-semibold text-foreground">
-              {filteredProducts.length === products.length
-                ? products.length
-                : `${filteredProducts.length} / ${products.length}`}
-            </span>{" "}
-            tracked
+          <div className="flex items-center gap-2">
+            <MobileFiltersSheet />
+            <div className="text-sm text-muted-foreground">
+              <span className="font-display font-semibold text-foreground">
+                {filteredProducts.length === products.length
+                  ? products.length
+                  : `${filteredProducts.length} / ${products.length}`}
+              </span>{" "}
+              tracked
+            </div>
           </div>
         </header>
         {filteredProducts.length > 0 ? (

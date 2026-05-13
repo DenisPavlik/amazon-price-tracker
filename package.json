@@ -1,14 +1,15 @@
 {
-  "name": "amazon-price-tracker",
+  "name": "amzpulse",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src",
     "db:push": "bunx dotenv -e .env.local -- bunx prisma db push",
     "db:backfill-lowest": "bunx dotenv -e .env.local -- bun run scripts/backfill-lowest-price.ts",
+    "db:backfill-list-price": "bunx dotenv -e .env.local -- bun run scripts/backfill-list-price.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

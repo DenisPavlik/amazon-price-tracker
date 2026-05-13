@@ -54,7 +54,7 @@ export default async function ProductDetailPage({
       ];
 
   const prices = sorted.map((h) => h.price);
-  const initial = prices[0];
+  const baseline = product.listPrice ?? prices[0];
   const latest = prices[prices.length - 1];
   const lowest = product.lowestPrice ?? Math.min(...prices);
   const highest = Math.max(...prices);
@@ -62,11 +62,15 @@ export default async function ProductDetailPage({
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 30);
   const within30 = sorted.filter((h) => h.createdAt >= cutoff);
-  const ref30 = within30.length > 0 ? within30[0].price : initial;
+  const ref30 = within30.length > 0 ? within30[0].price : prices[0];
   const change30Pct = ref30 > 0 ? ((latest - ref30) / ref30) * 100 : 0;
 
   const trend: "green" | "red" | "orange" =
-    latest < initial ? "green" : latest > initial ? "red" : "orange";
+    product.price < baseline
+      ? "green"
+      : product.price > baseline
+        ? "red"
+        : "orange";
 
   const chartData = sorted.map((h) => ({
     x: h.createdAt.toISOString().slice(0, 10),
@@ -136,7 +140,7 @@ export default async function ProductDetailPage({
       </RevealSection>
 
       <RevealSection delay={0.1} className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Stat label="Current" value={fmtPrice(latest)} />
+        <Stat label="Current" value={fmtPrice(product.price)} />
         <Stat label="Lowest" value={fmtPrice(lowest)} accent="green" />
         <Stat label="Highest" value={fmtPrice(highest)} accent="red" />
         <Stat

@@ -46,24 +46,34 @@ export async function getTotalSavingsAllTime(
 ): Promise<number> {
   const products = await prisma.product.findMany({
     where: { userEmail },
-    select: { amazonId: true, price: true },
+    select: { amazonId: true, price: true, listPrice: true },
   });
   if (products.length === 0) return 0;
 
-  const maxRows = await prisma.productDataHistory.groupBy({
-    by: ["amazonId"],
-    where: { amazonId: { in: products.map((p) => p.amazonId) } },
-    _max: { price: true },
-  });
-
-  const maxByAsin = new Map(
-    maxRows.map((row) => [row.amazonId, row._max.price ?? 0])
-  );
+  const productsMissingListPrice = products.filter((p) => p.listPrice == null);
+  const initialByAsin = new Map<string, number>();
+  if (productsMissingListPrice.length > 0) {
+    const initialRows = await Promise.all(
+      productsMissingListPrice.map((p) =>
+        prisma.productDataHistory.findFirst({
+          where: { amazonId: p.amazonId },
+          orderBy: { createdAt: "asc" },
+          select: { amazonId: true, price: true },
+        })
+      )
+    );
+    for (const row of initialRows) {
+      if (row) initialByAsin.set(row.amazonId, row.price);
+    }
+  }
 
   let total = 0;
   for (const product of products) {
-    const max = maxByAsin.get(product.amazonId) ?? product.price;
-    if (max > product.price) total += max - product.price;
+    const baseline =
+      product.listPrice ??
+      initialByAsin.get(product.amazonId) ??
+      product.price;
+    if (baseline > product.price) total += baseline - product.price;
   }
   return total;
 }

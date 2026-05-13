@@ -91,6 +91,7 @@ export async function addProduct(
     await prisma.product.create({
       data: {
         ...productData,
+        listPrice: productData.listPrice ?? productData.price,
         userEmail: user.email,
       },
     });

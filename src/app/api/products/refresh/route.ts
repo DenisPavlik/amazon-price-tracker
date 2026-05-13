@@ -28,7 +28,8 @@ export async function GET(req: NextRequest) {
     }
 
     const newProductData = await productScraper(product.amazonId);
-    await prisma.productDataHistory.create({ data: newProductData });
+    const { listPrice: scrapedListPrice, ...historyData } = newProductData;
+    await prisma.productDataHistory.create({ data: historyData });
 
     const newLowest =
       product.lowestPrice == null
@@ -40,6 +41,7 @@ export async function GET(req: NextRequest) {
       data: {
         price: newProductData.price,
         lowestPrice: newLowest,
+        ...(scrapedListPrice !== null && { listPrice: scrapedListPrice }),
         updatedAt: new Date(),
       },
     });

@@ -14,7 +14,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// Price fields (`price`, `targetPrice`, `lowestPrice`) are stored as integer **cents**.
+/// Price fields (`price`, `targetPrice`, `lowestPrice`, `listPrice`) are stored as integer **cents**.
+/// `listPrice` mirrors Amazon's "M.S.R.P." / strikethrough price and is the baseline for trend / savings math.
 /// `reviewsAverageRating` is the star rating × 10 stored as Int (e.g. 4.2 → 42).
 /// UI must divide accordingly when rendering.
 model Product {
@@ -28,6 +29,7 @@ model Product {
   reviewsAverageRating Int
   targetPrice          Int?
   lowestPrice          Int?
+  listPrice            Int?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 

@@ -31,6 +31,7 @@ describe("productScraper", () => {
           asin: "B0ABCDEFGH",
           product_title: "Sample",
           product_price: "$2,640.61",
+          product_original_price: "$2,999.99",
           product_photo: "https://img/x.jpg",
           product_star_rating: "4.7",
           product_num_ratings: 1234,
@@ -44,6 +45,7 @@ describe("productScraper", () => {
       title: "Sample",
       img: "https://img/x.jpg",
       price: 264061, // 2640.61 → cents
+      listPrice: 299999, // 2999.99 → cents
       reviewsCount: 1234,
       reviewsAverageRating: 47, // 4.7 × 10
       amazonId: "B0ABCDEFGH",
@@ -66,6 +68,7 @@ describe("productScraper", () => {
           asin: "B0ABCDEFGH",
           product_title: "No price",
           product_price: null,
+          product_original_price: null,
           product_photo: null,
           product_star_rating: null,
           product_num_ratings: null,
@@ -75,9 +78,31 @@ describe("productScraper", () => {
 
     const result = await productScraper("B0ABCDEFGH");
     expect(result.price).toBe(0);
+    expect(result.listPrice).toBeNull();
     expect(result.img).toBe("");
     expect(result.reviewsAverageRating).toBe(0);
     expect(result.reviewsCount).toBe(0);
+  });
+
+  it("returns listPrice=null when product_original_price is missing", async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        status: "OK",
+        data: {
+          asin: "B0ABCDEFGH",
+          product_title: "No discount",
+          product_price: "$50.00",
+          product_original_price: null,
+          product_photo: "https://img/x.jpg",
+          product_star_rating: "4.0",
+          product_num_ratings: 10,
+        },
+      })
+    );
+
+    const result = await productScraper("B0ABCDEFGH");
+    expect(result.price).toBe(5000);
+    expect(result.listPrice).toBeNull();
   });
 
   it("throws ScraperError(quota_exceeded) on HTTP 429", async () => {

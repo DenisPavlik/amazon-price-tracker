@@ -31,6 +31,7 @@ type ProductDetailsResponse = {
     asin: string;
     product_title: string;
     product_price: string | null;
+    product_original_price: string | null;
     product_photo: string | null;
     product_star_rating: string | null;
     product_num_ratings: number | null;
@@ -91,12 +92,15 @@ export async function productScraper(productId: string) {
   const product = json.data;
   const priceNum = parseLocalizedNumber(product.product_price);
   const ratingNum = parseLocalizedNumber(product.product_star_rating);
+  const listPriceNum = parseLocalizedNumber(product.product_original_price);
+  const listPriceCents = Math.round(listPriceNum * 100);
 
   // price → cents (Int); rating → star × 10 (Int). See prisma/schema.prisma.
   return {
     title: product.product_title,
     img: product.product_photo ?? "",
     price: Math.round(priceNum * 100),
+    listPrice: listPriceCents > 0 ? listPriceCents : null,
     reviewsCount: product.product_num_ratings ?? 0,
     reviewsAverageRating: Math.round(ratingNum * 10),
     amazonId: productId,

@@ -97,15 +97,13 @@ export default function DashboardProductCard({
   const router = useRouter();
 
   const isUnavailable = product.price === 0;
-  const initialPrice = history.length ? history[0].price : product.price;
-  const latestPrice = history.length
-    ? history[history.length - 1].price
-    : product.price;
+  const baselinePrice =
+    product.listPrice ?? (history.length ? history[0].price : product.price);
 
   const trend: Trend =
-    latestPrice < initialPrice
+    product.price < baselinePrice
       ? "green"
-      : latestPrice > initialPrice
+      : product.price > baselinePrice
         ? "red"
         : "orange";
 
@@ -117,8 +115,8 @@ export default function DashboardProductCard({
         : "var(--chart-orange)";
 
   const deltaPct =
-    initialPrice > 0
-      ? Math.abs(((latestPrice - initialPrice) / initialPrice) * 100)
+    baselinePrice > 0
+      ? Math.abs(((product.price - baselinePrice) / baselinePrice) * 100)
       : 0;
 
   const rating = product.reviewsAverageRating / 10;

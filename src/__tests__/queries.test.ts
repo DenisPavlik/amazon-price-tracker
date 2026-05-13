@@ -82,25 +82,52 @@ describe("getTotalSavingsAllTime", () => {
     expect(await getTotalSavingsAllTime("a@b.com")).toBe(0);
   });
 
-  it("sums (max - current) for products where max > current", async () => {
+  it("sums (listPrice - current) for products where listPrice > current", async () => {
     mocked.product.findMany.mockResolvedValue([
-      { amazonId: "A1", price: 500 },
-      { amazonId: "A2", price: 1000 },
-      { amazonId: "A3", price: 700 },
-    ]);
-    mocked.productDataHistory.groupBy.mockResolvedValue([
-      { amazonId: "A1", _max: { price: 1000 } }, // saves 500
-      { amazonId: "A2", _max: { price: 1000 } }, // saves 0
-      { amazonId: "A3", _max: { price: 900 } }, // saves 200
+      { amazonId: "A1", price: 500, listPrice: 1000 }, // saves 500
+      { amazonId: "A2", price: 1000, listPrice: 1000 }, // saves 0
+      { amazonId: "A3", price: 700, listPrice: 900 }, // saves 200
     ]);
     expect(await getTotalSavingsAllTime("a@b.com")).toBe(700);
+    expect(mocked.productDataHistory.findFirst).not.toHaveBeenCalled();
   });
 
-  it("falls back to current price when amazonId has no history row", async () => {
+  it("does not count savings when current price >= listPrice", async () => {
     mocked.product.findMany.mockResolvedValue([
-      { amazonId: "A1", price: 500 },
+      { amazonId: "A1", price: 600, listPrice: 500 }, // current > list → 0
     ]);
-    mocked.productDataHistory.groupBy.mockResolvedValue([]);
     expect(await getTotalSavingsAllTime("a@b.com")).toBe(0);
+  });
+
+  it("falls back to initial history price when listPrice is null", async () => {
+    mocked.product.findMany.mockResolvedValue([
+      { amazonId: "A1", price: 500, listPrice: null },
+    ]);
+    mocked.productDataHistory.findFirst.mockResolvedValue({
+      amazonId: "A1",
+      price: 1000,
+    });
+    expect(await getTotalSavingsAllTime("a@b.com")).toBe(500);
+  });
+
+  it("returns 0 when listPrice is null and no history row exists", async () => {
+    mocked.product.findMany.mockResolvedValue([
+      { amazonId: "A1", price: 500, listPrice: null },
+    ]);
+    mocked.productDataHistory.findFirst.mockResolvedValue(null);
+    expect(await getTotalSavingsAllTime("a@b.com")).toBe(0);
+  });
+
+  it("only queries history for products missing listPrice", async () => {
+    mocked.product.findMany.mockResolvedValue([
+      { amazonId: "A1", price: 500, listPrice: 1000 }, // saves 500, no history lookup
+      { amazonId: "A2", price: 400, listPrice: null }, // history lookup needed
+    ]);
+    mocked.productDataHistory.findFirst.mockResolvedValue({
+      amazonId: "A2",
+      price: 600,
+    });
+    expect(await getTotalSavingsAllTime("a@b.com")).toBe(500 + 200);
+    expect(mocked.productDataHistory.findFirst).toHaveBeenCalledTimes(1);
   });
 });
